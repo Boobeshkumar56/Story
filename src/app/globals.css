@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Line Clamp Utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth Scrolling */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Fix for scrollbar-induced layout shift */
+html.scroll-locked {
+  overflow: hidden !important;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html.scroll-locked::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Global scrollbar hiding for blog page */
+html.hide-all-scrollbars, 
+html.hide-all-scrollbars * {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+html.hide-all-scrollbars *::-webkit-scrollbar,
+html.hide-all-scrollbars::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Custom Font Styles */
+.font-serif {
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Camera Lens Scale Animations */
+@keyframes focus-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+.focus-pulse {
+  animation: focus-pulse 1.2s ease-in-out infinite;
+}
+
+/* Lens Focus Scale */
+.focus-scale-texture {
+  background-image: 
+    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+  background-size: 10px 100%, 5px 100%;
+  background-position: center;
+}
+
+/* Fine tick marks for lens scale */
+.lens-ticks {
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px),
+    repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.7) 24px, rgba(255,255,255,0.7) 26px);
+}
