@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Camera, Instagram, Facebook, Phone, Mail, MapPin, X } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 export default function Home() {
@@ -21,41 +22,32 @@ export default function Home() {
     }
   };
 
-  const galleryImages = [
-    { id: 1, src: '/api/placeholder/400/600', alt: 'Portrait 1' },
-    { id: 2, src: '/api/placeholder/600/400', alt: 'Landscape 1' },
-    { id: 3, src: '/api/placeholder/400/500', alt: 'Portrait 2' },
-    { id: 4, src: '/api/placeholder/500/400', alt: 'Landscape 2' },
-    { id: 5, src: '/api/placeholder/400/700', alt: 'Portrait 3' },
-    { id: 6, src: '/api/placeholder/700/400', alt: 'Landscape 3' },
-  ];
-
   // Extended gallery for full portfolio
   const fullPortfolioImages = [
-    { id: 1, src: '/api/placeholder/400/600', alt: 'Portrait 1', size: 'tall' },
-    { id: 2, src: '/api/placeholder/600/400', alt: 'Landscape 1', size: 'wide' },
-    { id: 3, src: '/api/placeholder/400/500', alt: 'Portrait 2', size: 'medium' },
-    { id: 4, src: '/api/placeholder/500/400', alt: 'Landscape 2', size: 'medium' },
-    { id: 5, src: '/api/placeholder/400/700', alt: 'Portrait 3', size: 'tall' },
-    { id: 6, src: '/api/placeholder/700/400', alt: 'Landscape 3', size: 'wide' },
-    { id: 7, src: '/api/placeholder/350/350', alt: 'Square 1', size: 'square' },
-    { id: 8, src: '/api/placeholder/450/650', alt: 'Portrait 4', size: 'tall' },
-    { id: 9, src: '/api/placeholder/550/350', alt: 'Landscape 4', size: 'medium' },
-    { id: 10, src: '/api/placeholder/350/350', alt: 'Square 2', size: 'square' },
-    { id: 11, src: '/api/placeholder/400/600', alt: 'Portrait 5', size: 'tall' },
-    { id: 12, src: '/api/placeholder/650/400', alt: 'Landscape 5', size: 'wide' },
-    { id: 13, src: '/api/placeholder/350/450', alt: 'Portrait 6', size: 'medium' },
-    { id: 14, src: '/api/placeholder/350/350', alt: 'Square 3', size: 'square' },
-    { id: 15, src: '/api/placeholder/500/700', alt: 'Portrait 7', size: 'tall' },
-    { id: 16, src: '/api/placeholder/600/350', alt: 'Landscape 6', size: 'wide' },
-    { id: 17, src: '/api/placeholder/400/400', alt: 'Square 4', size: 'square' },
-    { id: 18, src: '/api/placeholder/450/550', alt: 'Portrait 8', size: 'medium' },
-    { id: 19, src: '/api/placeholder/550/400', alt: 'Landscape 7', size: 'medium' },
-    { id: 20, src: '/api/placeholder/350/350', alt: 'Square 5', size: 'square' },
-    { id: 21, src: '/api/placeholder/400/650', alt: 'Portrait 9', size: 'tall' },
-    { id: 22, src: '/api/placeholder/700/450', alt: 'Landscape 8', size: 'wide' },
-    { id: 23, src: '/api/placeholder/350/450', alt: 'Portrait 10', size: 'medium' },
-    { id: 24, src: '/api/placeholder/450/350', alt: 'Landscape 9', size: 'medium' },
+    { id: 1, src: 'https://picsum.photos/400/600?random=11', alt: 'Portrait 1', size: 'tall' },
+    { id: 2, src: 'https://picsum.photos/600/400?random=12', alt: 'Landscape 1', size: 'wide' },
+    { id: 3, src: 'https://picsum.photos/400/500?random=13', alt: 'Portrait 2', size: 'medium' },
+    { id: 4, src: 'https://picsum.photos/500/400?random=14', alt: 'Landscape 2', size: 'medium' },
+    { id: 5, src: 'https://picsum.photos/400/700?random=15', alt: 'Portrait 3', size: 'tall' },
+    { id: 6, src: 'https://picsum.photos/700/400?random=16', alt: 'Landscape 3', size: 'wide' },
+    { id: 7, src: 'https://picsum.photos/350/350?random=17', alt: 'Square 1', size: 'square' },
+    { id: 8, src: 'https://picsum.photos/450/650?random=18', alt: 'Portrait 4', size: 'tall' },
+    { id: 9, src: 'https://picsum.photos/550/350?random=19', alt: 'Landscape 4', size: 'medium' },
+    { id: 10, src: 'https://picsum.photos/350/350?random=20', alt: 'Square 2', size: 'square' },
+    { id: 11, src: 'https://picsum.photos/400/600?random=21', alt: 'Portrait 5', size: 'tall' },
+    { id: 12, src: 'https://picsum.photos/650/400?random=22', alt: 'Landscape 5', size: 'wide' },
+    { id: 13, src: 'https://picsum.photos/350/450?random=23', alt: 'Portrait 6', size: 'medium' },
+    { id: 14, src: 'https://picsum.photos/350/350?random=24', alt: 'Square 3', size: 'square' },
+    { id: 15, src: 'https://picsum.photos/500/700?random=25', alt: 'Portrait 7', size: 'tall' },
+    { id: 16, src: 'https://picsum.photos/600/350?random=26', alt: 'Landscape 6', size: 'wide' },
+    { id: 17, src: 'https://picsum.photos/400/400?random=27', alt: 'Square 4', size: 'square' },
+    { id: 18, src: 'https://picsum.photos/450/550?random=28', alt: 'Portrait 8', size: 'medium' },
+    { id: 19, src: 'https://picsum.photos/550/400?random=29', alt: 'Landscape 7', size: 'medium' },
+    { id: 20, src: 'https://picsum.photos/350/350?random=30', alt: 'Square 5', size: 'square' },
+    { id: 21, src: 'https://picsum.photos/400/650?random=31', alt: 'Portrait 9', size: 'tall' },
+    { id: 22, src: 'https://picsum.photos/700/450?random=32', alt: 'Landscape 8', size: 'wide' },
+    { id: 23, src: 'https://picsum.photos/350/450?random=33', alt: 'Portrait 10', size: 'medium' },
+    { id: 24, src: 'https://picsum.photos/450/350?random=34', alt: 'Landscape 9', size: 'medium' },
   ];
 
   return (
@@ -389,7 +381,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-xl mb-8 text-gray-300"
           >
-            Let's capture your special moments and transform them into lasting memories
+            Let&apos;s capture your special moments and transform them into lasting memories
           </motion.p>
 
           <motion.div
@@ -531,7 +523,7 @@ export default function Home() {
             <div className="md:col-span-2">
               <h3 className="text-3xl font-light mb-4 tracking-widest">STORIES</h3>
               <p className="text-gray-400 font-light leading-relaxed mb-6 max-w-md">
-                Capturing life's most precious moments through the art of photography. 
+                Capturing life&apos;s most precious moments through the art of photography. 
                 Creating timeless memories that tell your unique story.
               </p>
               <div className="flex gap-4">
@@ -545,9 +537,9 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-light mb-4 tracking-wide">QUICK LINKS</h4>
               <ul className="space-y-3">
-                <li><a href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</a></li>
-                <li><a href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</a></li>
-                <li><a href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</a></li>
+                <li><Link href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</Link></li>
+                <li><Link href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</Link></li>
+                <li><Link href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</Link></li>
               </ul>
             </div>
 

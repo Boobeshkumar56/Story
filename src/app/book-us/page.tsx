@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Mail, Camera, Heart, Star, Check } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function BookUs() {
-  const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -84,7 +84,7 @@ export default function BookUs() {
       type: "Wedding",
       rating: 5,
       text: "Absolutely stunning work! They captured every precious moment of our wedding day. The attention to detail and emotional storytelling through photos was incredible.",
-      image: "/api/placeholder/80/80"
+      image: "https://picsum.photos/80/80?random=301"
     },
     {
       id: 2,
@@ -92,7 +92,7 @@ export default function BookUs() {
       type: "Portrait",
       rating: 5,
       text: "Professional, creative, and so much fun to work with. The portrait session was comfortable and the results exceeded our expectations completely.",
-      image: "/api/placeholder/80/80"
+      image: "https://picsum.photos/80/80?random=302"
     },
     {
       id: 3,
@@ -100,7 +100,7 @@ export default function BookUs() {
       type: "Event",
       rating: 5,
       text: "They made our corporate event look amazing! Great communication, punctual, and delivered beautiful photos that perfectly captured the essence of our celebration.",
-      image: "/api/placeholder/80/80"
+      image: "https://picsum.photos/80/80?random=303"
     }
   ];
 
@@ -143,7 +143,7 @@ export default function BookUs() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto font-light tracking-wide leading-relaxed"
           >
-            Let's create beautiful memories together. Choose from our packages or contact us for a custom consultation
+            Let&apos;s create beautiful memories together. Choose from our packages or contact us for a custom consultation
           </motion.p>
 
           <motion.div
@@ -237,7 +237,7 @@ export default function BookUs() {
             viewport={{ once: true }}
             className="grid md:grid-cols-3 gap-8"
           >
-            {packages.map((pkg, index) => (
+            {packages.map((pkg) => (
               <motion.div
                 key={pkg.id}
                 variants={fadeInUp}
@@ -246,7 +246,6 @@ export default function BookUs() {
                 className={`relative bg-white shadow-xl overflow-hidden cursor-pointer ${
                   pkg.popular ? 'ring-2 ring-black' : ''
                 }`}
-                onClick={() => setSelectedPackage(pkg.id)}
               >
                 {pkg.popular && (
                   <motion.div 
@@ -329,7 +328,7 @@ export default function BookUs() {
               viewport={{ once: true }}
               className="text-lg text-gray-600"
             >
-              Fill out the form below and we'll get back to you within 24 hours
+              Fill out the form below and we&apos;ll get back to you within 24 hours
             </motion.p>
           </div>
 
@@ -499,7 +498,7 @@ export default function BookUs() {
               viewport={{ once: true }}
               className="text-lg text-gray-600"
             >
-              Don't just take our word for it - hear from our happy clients
+              Don&apos;t just take our word for it - hear from our happy clients
             </motion.p>
           </div>
 
@@ -510,7 +509,7 @@ export default function BookUs() {
             viewport={{ once: true }}
             className="grid md:grid-cols-3 gap-8"
           >
-            {testimonials.map((testimonial, index) => (
+            {testimonials.map((testimonial) => (
               <motion.div
                 key={testimonial.id}
                 variants={fadeInUp}
@@ -533,7 +532,7 @@ export default function BookUs() {
                 </div>
 
                 <p className="text-gray-700 italic leading-relaxed font-serif text-lg">
-                  "{testimonial.text}"
+                  &ldquo;{testimonial.text}&rdquo;
                 </p>
               </motion.div>
             ))}
@@ -611,7 +610,7 @@ export default function BookUs() {
             <div className="md:col-span-2">
               <h3 className="text-3xl font-light mb-4 tracking-widest">STORIES</h3>
               <p className="text-gray-400 font-light leading-relaxed mb-6 max-w-md">
-                Capturing life's most precious moments through the art of photography. 
+                Capturing life&apos;s most precious moments through the art of photography. 
                 Creating timeless memories that tell your unique story.
               </p>
               <div className="flex gap-4">
@@ -625,9 +624,9 @@ export default function BookUs() {
             <div>
               <h4 className="text-lg font-light mb-4 tracking-wide">QUICK LINKS</h4>
               <ul className="space-y-3">
-                <li><a href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</a></li>
-                <li><a href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</a></li>
-                <li><a href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</a></li>
+                <li><Link href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</Link></li>
+                <li><Link href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</Link></li>
+                <li><Link href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</Link></li>
               </ul>
             </div>
 

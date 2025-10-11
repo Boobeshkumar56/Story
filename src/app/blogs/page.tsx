@@ -1,18 +1,15 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Calendar, Clock, ArrowRight, Search, Mail, Phone, MapPin, Camera, Instagram, Facebook } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Calendar, Clock, ArrowRight, Mail, Phone, MapPin, Camera, Instagram, Facebook } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Blogs() {
   const [selectedFilter, setSelectedFilter] = useState('All Time');
   const [email, setEmail] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
   
   const [scrollProgress, setScrollProgress] = useState(0);
   
@@ -32,11 +29,9 @@ export default function Blogs() {
     const section = containerRef.current;
     if (!section) return;
     
-    let scrollStartPosition = 0;
     let isLocked = false;
     let lockPosition = 0;
     let scrollVelocity = 0;
-    let lastDeltaY = 0;
     let lastTimestamp = 0;
     let animationFrame: number;
     
@@ -118,13 +113,11 @@ export default function Blogs() {
         scrollVelocity = scrollVelocity * 0.8 + instantVelocity * 0.002;
       }
       
-      lastDeltaY = e.deltaY;
       lastTimestamp = now;
       
       // Check if we're in the horizontal scrolling section
       if (rect.top <= 100 && rect.bottom >= 100) {
         if (!isLocked && scrollProgress < 0.98) {
-          scrollStartPosition = window.scrollY;
           lockScroll();
           cancelAnimationFrame(animationFrame);
         }
@@ -171,7 +164,6 @@ export default function Blogs() {
         touchStartY = e.touches[0].clientY;
         
         if (!isLocked && scrollProgress < 0.98) {
-          scrollStartPosition = window.scrollY;
           lockScroll();
         }
       }
@@ -217,66 +209,52 @@ export default function Blogs() {
     {
       id: 1,
       title: "Golden Hour Magic",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=101",
       category: "Portrait"
     },
     {
       id: 2,
       title: "Urban Stories",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=102",
       category: "Street"
     },
     {
       id: 3,
       title: "Wedding Bliss",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=103",
       category: "Wedding"
     },
     {
       id: 4,
       title: "Nature's Canvas",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=104",
       category: "Landscape"
     },
     {
       id: 5,
       title: "Intimate Moments",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=105",
       category: "Couple"
     },
     {
       id: 6,
       title: "Fashion Forward",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=106",
       category: "Fashion"
     },
     {
       id: 7,
       title: "Artistic Vision",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=107",
       category: "Art"
     },
     {
       id: 8,
       title: "Cultural Heritage",
-      image: "/api/placeholder/600/400",
+      image: "https://picsum.photos/600/400?random=108",
       category: "Culture"
     }
   ];
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
 
   const timeFilters = ['All Time', 'This Week', 'This Month', 'This Year'];
 
@@ -288,7 +266,7 @@ export default function Blogs() {
       id: 1,
       title: "Capturing Golden Hour Portraits",
       excerpt: "Discover the magic of golden hour photography and how it transforms ordinary portraits into extraordinary art pieces.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=201",
       date: "2024-01-15",
       readTime: "5 min read",
       category: "Portraits"
@@ -297,7 +275,7 @@ export default function Blogs() {
       id: 2,
       title: "Wedding Photography Essentials",
       excerpt: "Essential tips and techniques for capturing perfect wedding moments that couples will treasure forever.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=202",
       date: "2024-01-10",
       readTime: "8 min read",
       category: "Weddings"
@@ -306,7 +284,7 @@ export default function Blogs() {
       id: 3,
       title: "Street Photography Storytelling",
       excerpt: "Learn how to tell compelling stories through street photography and capture authentic human emotions.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=203",
       date: "2024-01-05",
       readTime: "6 min read",
       category: "Street"
@@ -315,7 +293,7 @@ export default function Blogs() {
       id: 4,
       title: "Color Theory in Photography",
       excerpt: "Understanding color theory and how to use it effectively to create mood and atmosphere in your photographs.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=204",
       date: "2023-12-28",
       readTime: "7 min read",
       category: "Theory"
@@ -324,7 +302,7 @@ export default function Blogs() {
       id: 5,
       title: "Natural Light Techniques",
       excerpt: "Master the art of working with natural light to create stunning photographs in any environment.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=205",
       date: "2023-12-20",
       readTime: "9 min read",
       category: "Lighting"
@@ -333,7 +311,7 @@ export default function Blogs() {
       id: 6,
       title: "Behind the Scenes Stories",
       excerpt: "Personal stories and experiences from memorable photo shoots that shaped our creative journey.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=206",
       date: "2023-12-15",
       readTime: "4 min read",
       category: "Stories"
@@ -342,7 +320,7 @@ export default function Blogs() {
       id: 7,
       title: "Advanced Portrait Lighting",
       excerpt: "Professional lighting techniques for creating dramatic and compelling portrait photography.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=207",
       date: "2023-12-10",
       readTime: "6 min read",
       category: "Portraits"
@@ -351,7 +329,7 @@ export default function Blogs() {
       id: 8,
       title: "Photography Business Tips",
       excerpt: "Essential business advice for photographers looking to turn their passion into a successful career.",
-      image: "/api/placeholder/400/300",
+      image: "https://picsum.photos/400/300?random=208",
       date: "2023-12-05",
       readTime: "8 min read",
       category: "Business"
@@ -663,7 +641,7 @@ export default function Blogs() {
             <div className="md:col-span-2">
               <h3 className="text-3xl font-light mb-4 tracking-widest">STORIES</h3>
               <p className="text-gray-400 font-light leading-relaxed mb-6 max-w-md">
-                Capturing life's most precious moments through the art of photography. 
+                Capturing life&apos;s most precious moments through the art of photography. 
                 Creating timeless memories that tell your unique story.
               </p>
               <div className="flex gap-4">
@@ -677,9 +655,9 @@ export default function Blogs() {
             <div>
               <h4 className="text-lg font-light mb-4 tracking-wide">QUICK LINKS</h4>
               <ul className="space-y-3">
-                <li><a href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</a></li>
-                <li><a href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</a></li>
-                <li><a href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</a></li>
+                <li><Link href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</Link></li>
+                <li><Link href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</Link></li>
+                <li><Link href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</Link></li>
               </ul>
             </div>
 
@@ -720,3 +698,4 @@ export default function Blogs() {
     </div>
   );
 }
+
