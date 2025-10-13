@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Dancing_Script, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import ConditionalNavbar from "../components/ConditionalNavbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dancingScript = Dancing_Script({
+  variable: "--font-dancing",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Stories - Photography Portfolio",
-  description: "Capturing moments, creating stories through the lens",
+  title: "Stories by Mithu Ashwin - Professional Photography",
+  description: "Award-winning photographer who believes in stories; stories of love, laughter and happily ever after. Based in Coonoor, Nilgiris.",
 };
 
 export default function RootLayout({
@@ -26,10 +34,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dancingScript.variable} ${playfair.variable} ${inter.variable} antialiased bg-white text-black`}
       >
-        <Navbar />
-        <main className="pt-16">
+        <ConditionalNavbar />
+        <main>
           {children}
         </main>
       </body>

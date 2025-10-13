@@ -1,701 +1,503 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Calendar, Clock, ArrowRight, Mail, Phone, MapPin, Camera, Instagram, Facebook } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Heart, MessageCircle, Eye } from 'lucide-react';
 
 export default function Blogs() {
-  const [selectedFilter, setSelectedFilter] = useState('All Time');
-  const [email, setEmail] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const [scrollProgress, setScrollProgress] = useState(0);
-  
-  // Apply hide-all-scrollbars class when component mounts
-  useEffect(() => {
-    // Add class to hide all scrollbars on the page
-    document.documentElement.classList.add('hide-all-scrollbars');
-    
-    return () => {
-      // Remove class when component unmounts
-      document.documentElement.classList.remove('hide-all-scrollbars');
-    };
-  }, []);
-  
-  // Smooth scroll locking mechanism with spring physics
-  useEffect(() => {
-    const section = containerRef.current;
-    if (!section) return;
-    
-    let isLocked = false;
-    let lockPosition = 0;
-    let scrollVelocity = 0;
-    let lastTimestamp = 0;
-    let animationFrame: number;
-    
-    // Spring physics constants
-    const springStrength = 0.12;
-    const friction = 0.85;
-    let targetProgress = scrollProgress;
-    
-    const lockScroll = () => {
-      if (isLocked) return;
-      isLocked = true;
-      lockPosition = window.scrollY;
-      
-      // Add a class to html element to handle scrollbar consistently
-      document.documentElement.classList.add('scroll-locked');
-      
-      // Position the body to simulate scrolling without actually scrolling
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${lockPosition}px`;
-      document.body.style.width = '100%';
-    };
-    
-    const unlockScroll = () => {
-      if (!isLocked) return;
-      isLocked = false;
-      
-      // Remove the class from html element
-      document.documentElement.classList.remove('scroll-locked');
-      
-      // Restore body positioning
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      
-      // Restore scroll position
-      window.scrollTo(0, lockPosition);
-    };
-    
-    // Smooth animation loop using spring physics
-    const animateScroll = () => {
-      // Calculate spring force
-      const progressDiff = targetProgress - scrollProgress;
-      const springForce = progressDiff * springStrength;
-      
-      // Apply spring force to velocity with friction
-      scrollVelocity += springForce;
-      scrollVelocity *= friction;
-      
-      // Check if animation is still needed
-      if (Math.abs(progressDiff) < 0.001 && Math.abs(scrollVelocity) < 0.001) {
-        if (targetProgress >= 0.98) {
-          unlockScroll();
-        }
-        cancelAnimationFrame(animationFrame);
-        return;
-      }
-      
-      // Update scroll position
-      setScrollProgress(prev => Math.max(0, Math.min(0.98, prev + scrollVelocity)));
-      
-      // Continue animation
-      animationFrame = requestAnimationFrame(animateScroll);
-    };
-    
-    const handleWheel = (e: WheelEvent) => {
-      const rect = section.getBoundingClientRect();
-      const now = performance.now();
-      const deltaTime = now - lastTimestamp;
-      
-      // Calculate smooth velocity
-      if (deltaTime > 0) {
-        // Normalize wheel delta across browsers
-        const normalizedDelta = Math.sign(e.deltaY) * Math.min(Math.abs(e.deltaY), 60);
-        
-        // Calculate instantaneous velocity
-        const instantVelocity = normalizedDelta / deltaTime;
-        
-        // Smooth velocity with exponential moving average
-        scrollVelocity = scrollVelocity * 0.8 + instantVelocity * 0.002;
-      }
-      
-      lastTimestamp = now;
-      
-      // Check if we're in the horizontal scrolling section
-      if (rect.top <= 100 && rect.bottom >= 100) {
-        if (!isLocked && scrollProgress < 0.98) {
-          lockScroll();
-          cancelAnimationFrame(animationFrame);
-        }
-        
-        if (isLocked) {
-          // Update target position for spring physics
-          targetProgress = Math.max(0, Math.min(0.98, targetProgress + e.deltaY * 0.0008));
-          
-          // Start animation if not running
-          if (!animationFrame) {
-            animationFrame = requestAnimationFrame(animateScroll);
-          }
-          
-          e.preventDefault();
-        }
-      } else if (isLocked) {
-        unlockScroll();
-      }
-    };
-    
-    // Use scroll event to handle entering/exiting the section
-    const handleScroll = () => {
-      const rect = section.getBoundingClientRect();
-      
-      // If we scrolled past the section, make sure horizontal scroll is complete
-      if (rect.bottom < 0) {
-        targetProgress = 1;
-        setScrollProgress(1);
-      }
-      // If we're above the section, reset horizontal scroll
-      else if (rect.top > window.innerHeight) {
-        targetProgress = 0;
-        setScrollProgress(0);
-      }
-    };
-    
-    // Touch support for mobile devices
-    let touchStartY = 0;
-    
-    const handleTouchStart = (e: TouchEvent) => {
-      const rect = section.getBoundingClientRect();
-      
-      if (rect.top <= 100 && rect.bottom >= 100) {
-        touchStartY = e.touches[0].clientY;
-        
-        if (!isLocked && scrollProgress < 0.98) {
-          lockScroll();
-        }
-      }
-    };
-    
-    const handleTouchMove = (e: TouchEvent) => {
-      const rect = section.getBoundingClientRect();
-      
-      if (rect.top <= 100 && rect.bottom >= 100 && isLocked) {
-        const touchY = e.touches[0].clientY;
-        const touchDiff = touchStartY - touchY;
-        
-        // Update target position for spring physics
-        targetProgress = Math.max(0, Math.min(0.98, targetProgress + touchDiff * 0.002));
-        touchStartY = touchY;
-        
-        // Start animation if not running
-        if (!animationFrame) {
-          animationFrame = requestAnimationFrame(animateScroll);
-        }
-        
-        e.preventDefault();
-      }
-    };
-    
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('scroll', handleScroll);
-      cancelAnimationFrame(animationFrame);
-      unlockScroll();
-    };
-  }, [scrollProgress]);
-  
-  // Blog posts data
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
   const blogPosts = [
     {
       id: 1,
-      title: "Golden Hour Magic",
-      image: "https://picsum.photos/600/400?random=101",
-      category: "Portrait"
+      title: 'Sarah & John&apos;s Magical Wedding',
+      excerpt: 'A beautiful celebration of love in the misty hills of Ooty',
+      image: 'https://picsum.photos/800/600?random=101',
+      category: 'Wedding',
+      date: '2024-01-15',
+      likes: 234,
+      comments: 45,
+      views: 1200
     },
     {
       id: 2,
-      title: "Urban Stories",
-      image: "https://picsum.photos/600/400?random=102",
-      category: "Street"
+      title: 'Priya & Raj - A Love Story',
+      excerpt: 'Traditional elegance meets modern romance',
+      image: 'https://picsum.photos/800/600?random=102',
+      category: 'Wedding',
+      date: '2024-01-10',
+      likes: 189,
+      comments: 32,
+      views: 980
     },
     {
       id: 3,
-      title: "Wedding Bliss",
-      image: "https://picsum.photos/600/400?random=103",
-      category: "Wedding"
+      title: 'Monsoon Magic in Nilgiris',
+      excerpt: 'Capturing the ethereal beauty of pre-wedding moments',
+      image: 'https://picsum.photos/800/600?random=103',
+      category: 'Pre-Wedding',
+      date: '2024-01-05',
+      likes: 312,
+      comments: 56,
+      views: 1450
     },
     {
       id: 4,
-      title: "Nature's Canvas",
-      image: "https://picsum.photos/600/400?random=104",
-      category: "Landscape"
+      title: 'Portraits in Nature',
+      excerpt: 'When personality meets the wilderness',
+      image: 'https://picsum.photos/800/600?random=104',
+      category: 'Portrait',
+      date: '2023-12-28',
+      likes: 156,
+      comments: 28,
+      views: 750
     },
     {
       id: 5,
-      title: "Intimate Moments",
-      image: "https://picsum.photos/600/400?random=105",
-      category: "Couple"
+      title: 'Destination Wedding Chronicles',
+      excerpt: 'A three-day celebration across Kerala backwaters',
+      image: 'https://picsum.photos/800/600?random=105',
+      category: 'Wedding',
+      date: '2023-12-20',
+      likes: 421,
+      comments: 78,
+      views: 2100
     },
     {
       id: 6,
-      title: "Fashion Forward",
-      image: "https://picsum.photos/600/400?random=106",
-      category: "Fashion"
-    },
-    {
-      id: 7,
-      title: "Artistic Vision",
-      image: "https://picsum.photos/600/400?random=107",
-      category: "Art"
-    },
-    {
-      id: 8,
-      title: "Cultural Heritage",
-      image: "https://picsum.photos/600/400?random=108",
-      category: "Culture"
+      title: 'Golden Hour Sessions',
+      excerpt: 'Chasing light and creating memories',
+      image: 'https://picsum.photos/800/600?random=106',
+      category: 'Pre-Wedding',
+      date: '2023-12-15',
+      likes: 267,
+      comments: 41,
+      views: 1350
     }
   ];
-
-  const timeFilters = ['All Time', 'This Week', 'This Month', 'This Year'];
-
-  // Define highlighted images for horizontal scrolling gallery
-  const highlightedImages = blogPosts;
-  
-  const blogs = [
-    {
-      id: 1,
-      title: "Capturing Golden Hour Portraits",
-      excerpt: "Discover the magic of golden hour photography and how it transforms ordinary portraits into extraordinary art pieces.",
-      image: "https://picsum.photos/400/300?random=201",
-      date: "2024-01-15",
-      readTime: "5 min read",
-      category: "Portraits"
-    },
-    {
-      id: 2,
-      title: "Wedding Photography Essentials",
-      excerpt: "Essential tips and techniques for capturing perfect wedding moments that couples will treasure forever.",
-      image: "https://picsum.photos/400/300?random=202",
-      date: "2024-01-10",
-      readTime: "8 min read",
-      category: "Weddings"
-    },
-    {
-      id: 3,
-      title: "Street Photography Storytelling",
-      excerpt: "Learn how to tell compelling stories through street photography and capture authentic human emotions.",
-      image: "https://picsum.photos/400/300?random=203",
-      date: "2024-01-05",
-      readTime: "6 min read",
-      category: "Street"
-    },
-    {
-      id: 4,
-      title: "Color Theory in Photography",
-      excerpt: "Understanding color theory and how to use it effectively to create mood and atmosphere in your photographs.",
-      image: "https://picsum.photos/400/300?random=204",
-      date: "2023-12-28",
-      readTime: "7 min read",
-      category: "Theory"
-    },
-    {
-      id: 5,
-      title: "Natural Light Techniques",
-      excerpt: "Master the art of working with natural light to create stunning photographs in any environment.",
-      image: "https://picsum.photos/400/300?random=205",
-      date: "2023-12-20",
-      readTime: "9 min read",
-      category: "Lighting"
-    },
-    {
-      id: 6,
-      title: "Behind the Scenes Stories",
-      excerpt: "Personal stories and experiences from memorable photo shoots that shaped our creative journey.",
-      image: "https://picsum.photos/400/300?random=206",
-      date: "2023-12-15",
-      readTime: "4 min read",
-      category: "Stories"
-    },
-    {
-      id: 7,
-      title: "Advanced Portrait Lighting",
-      excerpt: "Professional lighting techniques for creating dramatic and compelling portrait photography.",
-      image: "https://picsum.photos/400/300?random=207",
-      date: "2023-12-10",
-      readTime: "6 min read",
-      category: "Portraits"
-    },
-    {
-      id: 8,
-      title: "Photography Business Tips",
-      excerpt: "Essential business advice for photographers looking to turn their passion into a successful career.",
-      image: "https://picsum.photos/400/300?random=208",
-      date: "2023-12-05",
-      readTime: "8 min read",
-      category: "Business"
-    }
-  ];
-
-  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Newsletter subscription:', email);
-    setEmail('');
-  };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative py-32 px-4 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-6xl mx-auto text-center relative z-10"
-        >
-          <motion.h1
+    <div className="min-h-screen bg-white pt-20">
+      {/* Header */}
+      <section className="pt-12 pb-16 px-8 md:px-12 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-6xl md:text-8xl lg:text-9xl font-extralight mb-8 tracking-wide leading-tight"
+            transition={{ duration: 1 }}
+            className="text-center"
           >
-            <span className="block text-white font-thin">PHOTOGRAPHY</span>
-            <span className="block text-gray-300 font-extralight mt-2">INSIGHTS</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg text-gray-400 mb-8 max-w-3xl mx-auto font-light tracking-wide leading-relaxed"
-          >
-            Explore our collection of photography tips, techniques, and stories from behind the lens. 
-            Discover the art and craft of visual storytelling.
-          </motion.p>
-        </motion.div>
-      </section>
-
-      {/* Horizontal Scrolling Highlighted Images */}
-      <section ref={containerRef} className="relative h-[110vh] overflow-hidden bg-gray-100 pt-5">
-        <div className="sticky top-10 flex items-center h-[calc(100vh-60px)]">
-          <motion.div 
-            className="flex gap-8 px-8 py-8"
-            style={{
-              x: -2000 * scrollProgress
-            }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 70, 
-              damping: 30
-            }}
-          >
-            {highlightedImages.map((image, index) => (
-              <motion.div
-                key={image.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="flex-shrink-0 w-80 h-60 relative group cursor-pointer shadow-xl"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10" />
-                <Image
-                  src={image.image}
-                  alt={image.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute bottom-6 left-6 text-white z-20">
-                  <span className="text-xs font-light tracking-widest text-gray-300 mb-2 block">
-                    {image.category.toUpperCase()}
-                  </span>
-                  <h3 className="text-xl font-light tracking-wide">
-                    {image.title}
-                  </h3>
-                </div>
-              </motion.div>
-            ))}
+            <h1 className="text-5xl md:text-7xl font-extralight tracking-[0.2em] mb-6">
+              CAPTURED MOMENTS
+            </h1>
+            <p className="text-lg text-gray-600 font-light">
+              Explore our latest photography projects and client celebrations
+            </p>
           </motion.div>
         </div>
-        
-        {/* Simplified Lens Zoom Scale - Only visible during parallel scrolling */}
-        <div 
-          className="absolute left-0 right-0 bottom-12 flex justify-center items-center z-50 pointer-events-none"
-          style={{ 
-            opacity: scrollProgress > 0.02 && scrollProgress < 0.98 ? 1 : 0, // Only show during scrolling, not before or after
-            transition: "opacity 0.3s ease-in-out",
-            width: "75%",
-            margin: "0 auto"
-          }}
-        >
-          {/* Lens scale container with increased visibility */}
-          <div className="relative mx-auto w-full h-[36px] backdrop-blur-[4px]">
-            {/* Main scale bar - bolder for visibility */}
-            <div className="absolute inset-0 border-t-2 border-b-2 border-white/50 bg-gradient-to-r from-black/70 via-black/80 to-black/70">
-              {/* Simplified tick marks */}
-              <div className="absolute inset-0 lens-ticks"></div>
+      </section>
+
+      {/* Blog Grid - Uniform Grid System */}
+      <section className="py-20 px-8 md:px-12 bg-black text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogPosts.map((post, index) => {
               
-              {/* Simplified number markings - only 100, 200, 300... */}
-              <div className="absolute top-0 left-0 right-0 h-4">
-                {[0, 100, 200, 300, 400, 500].map((num, i, arr) => (
-                  <div 
-                    key={num} 
-                    className="absolute top-0" 
-                    style={{ left: `${i * (100/(arr.length-1))}%` }}
-                  >
-                    <div className="w-[2px] h-[12px] bg-white"></div>
-                    <div className="absolute top-[14px] -translate-x-1/2 text-[12px] text-white font-bold tracking-wider">
-                      {num}
+              return (
+                <motion.article
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  onMouseEnter={() => setHoveredId(post.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  className="aspect-[4/5] bg-gray-800 relative overflow-hidden cursor-pointer group"
+                >
+                  <Link href={`/blogs/${post.id}`}>
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    
+                    {/* Corner Borders on Hover */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      {/* Top Left Corner */}
+                      <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-white"></div>
+                      {/* Top Right Corner */}
+                      <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-white"></div>
+                      {/* Bottom Left Corner */}
+                      <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-white"></div>
+                      {/* Bottom Right Corner */}
+                      <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-white"></div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Bolder active indicator line with enhanced RED glow effect */}
-              <motion.div 
-                className="absolute inset-y-0 w-[4px] bg-red-500 focus-pulse"
-                style={{ 
-                  boxShadow: '0 0 12px rgba(255, 0, 0, 0.9), 0 0 20px rgba(255, 0, 0, 0.7)'
-                }}
-                animate={{ 
-                  left: `${scrollProgress * 100}%` 
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 60,
-                  damping: 15
-                }}
-              >
-                {/* Small triangle indicator on top of line */}
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-red-500"></div>
-              </motion.div>
-            </div>
+
+                    {/* Overlay Content */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500" />
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
+                      <span className="text-xs tracking-[0.2em] text-gray-300 mb-2 block">
+                        {post.category.toUpperCase()}
+                      </span>
+                      
+                      <h3 className="font-light tracking-wide mb-2 text-lg md:text-xl">
+                        {post.title}
+                      </h3>
+                      
+                      <p
+                        className={`text-gray-300 text-sm mb-3 transition-all duration-500 ${
+                          hoveredId === post.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}
+                      >
+                        {post.excerpt}
+                      </p>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Heart size={12} />
+                          {post.likes}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle size={12} />
+                          {post.comments}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye size={12} />
+                          {post.views}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Read More Indicator */}
+                    <div
+                      className={`absolute top-6 right-6 w-10 h-10 border-2 border-white rounded-full flex items-center justify-center text-white transition-all duration-500 ${
+                        hoveredId === post.id ? 'opacity-100 scale-100 rotate-90' : 'opacity-0 scale-0 rotate-0'
+                      }`}
+                    >
+                      →
+                    </div>
+                  </Link>
+                </motion.article>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Time Filters */}
-      <section className="py-16 px-4 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-6xl mx-auto">
+      {/* Testimonials Section */}
+      <section className="py-32 px-8 md:px-12 bg-gray-100">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 1 }}
             viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-4 mb-12"
+            className="text-center mb-20"
           >
-            {timeFilters.map((filter) => (
-              <motion.button
-                key={filter}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedFilter(filter)}
-                className={`px-6 py-3 font-light tracking-wide transition-all duration-300 ${
-                  selectedFilter === filter
-                    ? 'bg-black text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {filter}
-              </motion.button>
-            ))}
-          </motion.div>
-
-          {/* Horizontal Blog Gallery */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="relative overflow-hidden"
-          >
-            <div className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 px-4" style={{ scrollSnapType: 'x mandatory' }}>
-              {blogs.map((blog, index) => (
-                <motion.article
-                  key={blog.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.05 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5, scale: 1.01 }}
-                  className="flex-shrink-0 w-96 bg-white shadow-xl overflow-hidden cursor-pointer group"
-                  style={{ scrollSnapAlign: 'start' }}
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={blog.image}
-                      alt={blog.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
-                  </div>
-
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        <span>{new Date(blog.date).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        <span>{blog.readTime}</span>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-light text-gray-900 mb-3 line-clamp-2 group-hover:text-gray-700 transition-colors">
-                      {blog.title}
-                    </h3>
-
-                    <p className="text-gray-600 font-light leading-relaxed mb-4 line-clamp-3">
-                      {blog.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 font-light tracking-wide">
-                        {blog.category}
-                      </span>
-                      <motion.div
-                        whileHover={{ x: 5 }}
-                        className="flex items-center text-black group-hover:text-gray-700 transition-colors"
-                      >
-                        <span className="text-sm font-light mr-2">Read More</span>
-                        <ArrowRight size={16} />
-                      </motion.div>
-                    </div>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Newsletter Subscription */}
-      <section className="py-20 px-4 bg-gray-900 text-white">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center"
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-6xl font-light mb-6 tracking-wide"
-          >
-            STAY INSPIRED
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-lg text-gray-400 mb-8 font-light leading-relaxed"
-          >
-            Subscribe to our newsletter for the latest photography tips, tutorials, and behind-the-scenes stories
-          </motion.p>
-
-          <motion.form
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            onSubmit={handleEmailSubmit}
-            className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto justify-center"
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="flex-1 px-6 py-4 bg-white text-gray-900 font-light tracking-wide focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="submit"
-              className="px-8 py-4 bg-black text-white font-light tracking-wide hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              Subscribe
-              <Mail size={16} />
-            </motion.button>
-          </motion.form>
-        </motion.div>
-      </section>
-
-      {/* Enhanced Footer */}
-      <footer className="bg-black text-white py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="grid md:grid-cols-4 gap-8 mb-12"
-          >
-            {/* Brand */}
-            <div className="md:col-span-2">
-              <h3 className="text-3xl font-light mb-4 tracking-widest">STORIES</h3>
-              <p className="text-gray-400 font-light leading-relaxed mb-6 max-w-md">
-                Capturing life&apos;s most precious moments through the art of photography. 
-                Creating timeless memories that tell your unique story.
-              </p>
-              <div className="flex gap-4">
-                <Camera className="text-gray-400 hover:text-white transition-colors cursor-pointer" size={20} />
-                <Instagram className="text-gray-400 hover:text-white transition-colors cursor-pointer" size={20} />
-                <Facebook className="text-gray-400 hover:text-white transition-colors cursor-pointer" size={20} />
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-lg font-light mb-4 tracking-wide">QUICK LINKS</h4>
-              <ul className="space-y-3">
-                <li><Link href="/" className="text-gray-400 hover:text-white transition-colors font-light">Home</Link></li>
-                <li><Link href="/blogs" className="text-gray-400 hover:text-white transition-colors font-light">Blogs</Link></li>
-                <li><Link href="/book-us" className="text-gray-400 hover:text-white transition-colors font-light">Book Us</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h4 className="text-lg font-light mb-4 tracking-wide">CONTACT</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-gray-400" />
-                  <span className="text-gray-400 font-light">(555) 123-4567</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail size={16} className="text-gray-400" />
-                  <span className="text-gray-400 font-light">hello@stories.com</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-gray-400" />
-                  <span className="text-gray-400 font-light">New York, NY</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Copyright */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="border-t border-gray-800 pt-8 text-center"
-          >
-            <p className="text-gray-500 font-light tracking-wide">
-              © 2024 Stories. All rights reserved. | Crafted with passion for photography
+            <h2 className="text-4xl md:text-5xl font-extralight tracking-[0.15em] mb-6 text-black">
+              CLIENT TESTIMONIALS
+            </h2>
+            <p className="text-lg text-gray-600 font-light">
+              What our clients say about their experience
             </p>
+            <div className="w-24 h-px bg-black mx-auto mt-8"></div>
           </motion.div>
+
+          <TestimonialCamera />
         </div>
-      </footer>
+      </section>
     </div>
   );
 }
 
+// Testimonial Camera Lens Component
+function TestimonialCamera() {
+  const [selectedId, setSelectedId] = useState<number>(1);
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      role: "Bride",
+      image: "https://picsum.photos/seed/face1/200/200",
+      comment: "Mithu captured every precious moment of our wedding day with such artistry and professionalism.",
+      galleryImages: [
+        "https://picsum.photos/seed/wedding1a/800/1000",
+        "https://picsum.photos/seed/wedding1b/800/1000",
+        "https://picsum.photos/seed/wedding1c/800/1000",
+        "https://picsum.photos/seed/wedding1d/800/1000"
+      ]
+    },
+    {
+      id: 2,
+      name: "Rajesh Kumar",
+      role: "Groom",
+      image: "https://picsum.photos/seed/face2/200/200",
+      comment: "The attention to detail and creative composition exceeded our expectations completely.",
+      galleryImages: [
+        "https://picsum.photos/seed/wedding2a/800/1000",
+        "https://picsum.photos/seed/wedding2b/800/1000",
+        "https://picsum.photos/seed/wedding2c/800/1000",
+        "https://picsum.photos/seed/wedding2d/800/1000"
+      ]
+    },
+    {
+      id: 3,
+      name: "Priya Sharma",
+      role: "Bride",
+      image: "https://picsum.photos/seed/face3/200/200",
+      comment: "Professional, patient, and incredibly talented. An absolutely memorable experience.",
+      galleryImages: [
+        "https://picsum.photos/seed/prewedding3a/800/1000",
+        "https://picsum.photos/seed/prewedding3b/800/1000",
+        "https://picsum.photos/seed/prewedding3c/800/1000",
+        "https://picsum.photos/seed/prewedding3d/800/1000"
+      ]
+    },
+    {
+      id: 4,
+      name: "Michael Chen",
+      role: "Corporate Client",
+      image: "https://picsum.photos/seed/face4/200/200",
+      comment: "Outstanding work on our corporate event. Perfectly captured our brand energy.",
+      galleryImages: [
+        "https://picsum.photos/seed/corporate4a/800/1000",
+        "https://picsum.photos/seed/corporate4b/800/1000",
+        "https://picsum.photos/seed/corporate4c/800/1000",
+        "https://picsum.photos/seed/corporate4d/800/1000"
+      ]
+    },
+    {
+      id: 5,
+      name: "Ananya Patel",
+      role: "Portrait Client",
+      image: "https://picsum.photos/seed/face5/200/200",
+      comment: "Truly exceptional artistic vision and technical skill revealed in every frame.",
+      galleryImages: [
+        "https://picsum.photos/seed/portrait5a/800/1000",
+        "https://picsum.photos/seed/portrait5b/800/1000",
+        "https://picsum.photos/seed/portrait5c/800/1000",
+        "https://picsum.photos/seed/portrait5d/800/1000"
+      ]
+    },
+    {
+      id: 6,
+      name: "David Wilson",
+      role: "Groom",
+      image: "https://picsum.photos/seed/face6/200/200",
+      comment: "Seamless process from consultation to final delivery. Unmatched quality throughout.",
+      galleryImages: [
+        "https://picsum.photos/seed/wedding6a/800/1000",
+        "https://picsum.photos/seed/wedding6b/800/1000",
+        "https://picsum.photos/seed/wedding6c/800/1000",
+        "https://picsum.photos/seed/wedding6d/800/1000"
+      ]
+    },
+    {
+      id: 7,
+      name: "Meera Iyer",
+      role: "Bride",
+      image: "https://picsum.photos/seed/face7/200/200",
+      comment: "Captured emotions and candid moments that made our album truly special.",
+      galleryImages: [
+        "https://picsum.photos/seed/wedding7a/800/1000",
+        "https://picsum.photos/seed/wedding7b/800/1000",
+        "https://picsum.photos/seed/wedding7c/800/1000",
+        "https://picsum.photos/seed/wedding7d/800/1000"
+      ]
+    },
+    {
+      id: 8,
+      name: "James Anderson",
+      role: "Event Coordinator",
+      image: "https://picsum.photos/seed/face8/200/200",
+      comment: "Exceptional professionalism and creative vision. Every shot perfectly composed.",
+      galleryImages: [
+        "https://picsum.photos/seed/event8a/800/1000",
+        "https://picsum.photos/seed/event8b/800/1000",
+        "https://picsum.photos/seed/event8c/800/1000",
+        "https://picsum.photos/seed/event8d/800/1000"
+      ]
+    }
+  ];
+
+  const handleTestimonialClick = (id: number) => {
+    if (selectedId !== id) {
+      setSelectedId(id);
+    }
+  };
+
+  const selectedTestimonial = testimonials.find(t => t.id === selectedId);
+  const selectedIndex = testimonials.findIndex(t => t.id === selectedId);
+
+  // Calculate rotation angle to bring selected item to top
+  const rotationAngle = -(selectedIndex * (360 / testimonials.length));
+
+  return (
+    <div className="relative w-full min-h-screen py-16 bg-gray-100">
+      {/* Background Gallery - 4 Images Crystal Clear */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+        <div className="grid grid-cols-4 h-full gap-0">
+          {selectedTestimonial?.galleryImages.map((img, index) => (
+            <motion.div
+              key={`${selectedId}-${index}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: index * 0.1,
+                ease: "easeInOut"
+              }}
+              className="relative h-full bg-gray-200"
+            >
+              <Image
+                src={img}
+                alt={`Gallery ${index + 1}`}
+                width={800}
+                height={1000}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-white/20"></div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Camera Lens - Classic Design */}
+      <div className="relative w-[600px] h-[600px] mx-auto z-10">
+        
+        {/* Single Clean Circle with Border */}
+        <div className="absolute inset-16 rounded-full border-2 border-black bg-white shadow-2xl">
+          
+          {/* Content Display Area - Text Only */}
+          <div className="absolute inset-0 flex items-center justify-center p-16 pointer-events-none z-20">
+            {selectedTestimonial && (
+              <motion.div
+                key={selectedId}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="text-center max-w-sm"
+              >
+                <motion.blockquote 
+                  className="text-base font-light text-gray-800 leading-relaxed mb-8 px-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                >
+                  &quot;{selectedTestimonial.comment}&quot;
+                </motion.blockquote>
+                
+                <motion.div 
+                  className="text-center pt-4 border-t border-gray-300"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.4 }}
+                >
+                  <p className="font-medium text-black text-base tracking-wide mb-1">
+                    {selectedTestimonial.name}
+                  </p>
+                  <p className="text-xs text-gray-600 tracking-[0.25em] font-light">
+                    {selectedTestimonial.role.toUpperCase()}
+                  </p>
+                </motion.div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Rotating Circle with Testimonial Images */}
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            animate={{ rotate: rotationAngle }}
+            transition={{ 
+              duration: 0.9, 
+              ease: [0.4, 0.0, 0.2, 1]
+            }}
+          >
+            {testimonials.map((testimonial, index) => {
+              const angle = (index * (360 / testimonials.length)) * (Math.PI / 180);
+              const radius = 284; // Exact radius to center on the border (half of container minus inset)
+              const imageSize = 80;
+              const x = Math.cos(angle - Math.PI / 2) * radius;
+              const y = Math.sin(angle - Math.PI / 2) * radius;
+
+              const isSelected = selectedId === testimonial.id;
+
+              return (
+                <motion.div
+                  key={testimonial.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    width: `${imageSize}px`,
+                    height: `${imageSize}px`,
+                    zIndex: isSelected ? 15 : 10
+                  }}
+                  animate={{
+                    x: x - imageSize / 2,
+                    y: y - imageSize / 2,
+                    rotate: -rotationAngle,
+                    scale: isSelected ? 1.1 : 1
+                  }}
+                  transition={{ 
+                    duration: 0.9, 
+                    ease: [0.4, 0.0, 0.2, 1]
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTestimonialClick(testimonial.id);
+                  }}
+                  whileHover={{ scale: isSelected ? 1.15 : 1.05 }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <div className="relative w-full h-full">
+                    {/* Selection Ring */}
+                    {isSelected && (
+                      <motion.div
+                        className="absolute -inset-2 rounded-full border-2 border-black"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                    
+                    {/* Image with White Border */}
+                    <div className="w-full h-full rounded-full border-4 border-white shadow-xl overflow-hidden">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        width={200}
+                        height={200}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    {/* Additional Ring for Selected */}
+                    {isSelected && (
+                      <div className="absolute inset-0 rounded-full ring-2 ring-black ring-offset-2 ring-offset-white"></div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+
+
+      </div>
+
+      {/* Instructions */}
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-center">
+        <p className="text-gray-400 text-xs font-light tracking-[0.15em]">
+          SELECT TO VIEW TESTIMONIAL
+        </p>
+      </div>
+    </div>
+  );
+}
