@@ -1,9 +1,9 @@
 # Cloudinary Integration Setup Guide
 
-## 🎯 Overview
+## Overview
 This photography portfolio uses **Cloudinary** for image storage and management. Each event is stored as a folder in Cloudinary, and all metadata is automatically managed.
 
-## 📋 Setup Steps
+##  Setup Steps
 
 ### 1. Create Cloudinary Account
 1. Go to [https://cloudinary.com](https://cloudinary.com)
@@ -26,7 +26,7 @@ CLOUDINARY_API_SECRET=your_actual_api_secret
 ### 3. Install Dependencies
 Already done! The `cloudinary` package is installed.
 
-## 🚀 How It Works
+## How It Works
 
 ### Admin Upload Process
 1. **Access Admin**: Double-click logo → Navigate to `/admin/blogs` → Enter password: `admin123`
@@ -69,7 +69,7 @@ Each folder contains a `metadata.json` file with:
 }
 ```
 
-## 📁 API Endpoints
+##  API Endpoints
 
 ### `/api/upload` - Upload Images
 - **Method**: POST
@@ -93,7 +93,7 @@ Each folder contains a `metadata.json` file with:
 - **Method**: POST
 - **Body**: `{ folderName, type: 'likes'|'views', increment: boolean }`
 
-## 🎨 Pages That Use Cloudinary
+## Pages That Use Cloudinary
 
 ### 1. Blogs Page (`/blogs`)
 - Fetches folder list from localStorage (`eventFolders`)
@@ -111,7 +111,7 @@ Each folder contains a `metadata.json` file with:
 ### 4. Library (Future)
 - Will load folders where `addToLibrary: true`
 
-## 📊 Local Storage Usage
+##  Local Storage Usage
 
 Only stores a **list of folder names** for quick access:
 ```javascript
@@ -130,15 +130,15 @@ localStorage.setItem('eventFolders', JSON.stringify([
 2. **API Keys**: Never commit `.env.local` to Git (already in `.gitignore`)
 3. **Production**: Implement proper authentication (JWT, sessions, etc.)
 
-## 🎯 Benefits
+## Benefits
 
-✅ **No Database Needed**: All data stored in Cloudinary  
-✅ **Automatic Optimization**: Cloudinary optimizes images  
-✅ **CDN Delivery**: Fast global image delivery  
-✅ **Easy Management**: View/delete folders from Cloudinary dashboard  
-✅ **Scalable**: Free tier includes 25GB storage + 25GB bandwidth
+ **No Database Needed**: All data stored in Cloudinary  
+ **Automatic Optimization**: Cloudinary optimizes images  
+ **CDN Delivery**: Fast global image delivery  
+ **Easy Management**: View/delete folders from Cloudinary dashboard  
+ **Scalable**: Free tier includes 25GB storage + 25GB bandwidth
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Images not uploading?
 - Check `.env.local` credentials
@@ -154,7 +154,7 @@ localStorage.setItem('eventFolders', JSON.stringify([
 - Check `/api/update-stats` endpoint
 - Verify metadata file exists in Cloudinary folder
 
-## 📝 Development vs Production
+##  Development vs Production
 
 **Current (Development)**:
 - Uses localhost
