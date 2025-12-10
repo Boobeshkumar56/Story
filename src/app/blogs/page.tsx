@@ -1,82 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Eye } from 'lucide-react';
+import { Heart, Eye, Calendar, Award, MapPin, MessageCircle } from 'lucide-react';
 
 export default function Blogs() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: 'Sarah & John&apos;s Magical Wedding',
-      excerpt: 'A beautiful celebration of love in the misty hills of Ooty',
-      image: 'https://picsum.photos/800/600?random=101',
-      category: 'Wedding',
-      date: '2024-01-15',
-      likes: 234,
-      comments: 45,
-      views: 1200
-    },
-    {
-      id: 2,
-      title: 'Priya & Raj - A Love Story',
-      excerpt: 'Traditional elegance meets modern romance',
-      image: 'https://picsum.photos/800/600?random=102',
-      category: 'Wedding',
-      date: '2024-01-10',
-      likes: 189,
-      comments: 32,
-      views: 980
-    },
-    {
-      id: 3,
-      title: 'Monsoon Magic in Nilgiris',
-      excerpt: 'Capturing the ethereal beauty of pre-wedding moments',
-      image: 'https://picsum.photos/800/600?random=103',
-      category: 'Pre-Wedding',
-      date: '2024-01-05',
-      likes: 312,
-      comments: 56,
-      views: 1450
-    },
-    {
-      id: 4,
-      title: 'Portraits in Nature',
-      excerpt: 'When personality meets the wilderness',
-      image: 'https://picsum.photos/800/600?random=104',
-      category: 'Portrait',
-      date: '2023-12-28',
-      likes: 156,
-      comments: 28,
-      views: 750
-    },
-    {
-      id: 5,
-      title: 'Destination Wedding Chronicles',
-      excerpt: 'A three-day celebration across Kerala backwaters',
-      image: 'https://picsum.photos/800/600?random=105',
-      category: 'Wedding',
-      date: '2023-12-20',
-      likes: 421,
-      comments: 78,
-      views: 2100
-    },
-    {
-      id: 6,
-      title: 'Golden Hour Sessions',
-      excerpt: 'Chasing light and creating memories',
-      image: 'https://picsum.photos/800/600?random=106',
-      category: 'Pre-Wedding',
-      date: '2023-12-15',
-      likes: 267,
-      comments: 41,
-      views: 1350
+  useEffect(() => {
+    loadBlogs();
+  }, []);
+
+  const loadBlogs = async () => {
+    try {
+      setLoading(true);
+      
+      // Get list of folders from localStorage (tracking which folders exist)
+      const eventFolders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+      
+      if (eventFolders.length === 0) {
+        // Show demo data if no events exist
+        setBlogPosts([
+          {
+            id: '1',
+            folderName: 'demo-wedding',
+            title: 'Demo Wedding Event',
+            excerpt: 'Upload your first event from the admin panel',
+            coverImage: 'https://picsum.photos/800/600?random=101',
+            category: 'Wedding',
+            date: '2024-01-15',
+            likes: 0,
+            views: 0
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch metadata for each folder
+      const blogsData = await Promise.all(
+        eventFolders.map(async (folderName: string) => {
+          try {
+            const response = await fetch(`/api/metadata?folder=${folderName}`);
+            const result = await response.json();
+            
+            if (result.success && result.metadata.addToBlogs) {
+              return {
+                id: folderName,
+                folderName: folderName,
+                ...result.metadata
+              };
+            }
+            return null;
+          } catch (error) {
+            console.error(`Error loading folder ${folderName}:`, error);
+            return null;
+          }
+        })
+      );
+
+      // Filter out null values and set blogs
+      const validBlogs = blogsData.filter(blog => blog !== null);
+      setBlogPosts(validBlogs);
+    } catch (error) {
+      console.error('Error loading blogs:', error);
+      setBlogPosts([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -100,9 +96,21 @@ export default function Blogs() {
       </section>
 
       {/* Blog Grid - Uniform Grid System */}
-      <section className="py-20 px-8 md:px-12 bg-black text-white">
+      {/* Blog Grid */}
+      <section className="pb-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+              <p className="mt-4 text-gray-600">Loading events...</p>
+            </div>
+          ) : blogPosts.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-xl text-gray-600">No events uploaded yet.</p>
+              <p className="text-gray-500 mt-2">Upload your first event from the admin panel.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
             {blogPosts.map((post, index) => {
               
               return (
@@ -117,7 +125,7 @@ export default function Blogs() {
                 >
                   <Link href={`/blogs/${post.id}`}>
                     <Image
-                      src={post.image}
+                      src={post.coverImage || post.image}
                       alt={post.title}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -159,15 +167,11 @@ export default function Blogs() {
                       <div className="flex items-center gap-4 text-xs text-gray-400">
                         <span className="flex items-center gap-1">
                           <Heart size={12} />
-                          {post.likes}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle size={12} />
-                          {post.comments}
+                          {post.likes || 0}
                         </span>
                         <span className="flex items-center gap-1">
                           <Eye size={12} />
-                          {post.views}
+                          {post.views || 0}
                         </span>
                       </div>
                     </div>
@@ -185,319 +189,186 @@ export default function Blogs() {
               );
             })}
           </div>
+          )}
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-32 px-8 md:px-12 bg-gray-100">
-        <div className="max-w-7xl mx-auto">
+      {/* About the Author Section - Creative Design */}
+      <section className="relative py-20 px-4 md:px-8 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-extralight tracking-[0.15em] mb-6 text-black">
-              CLIENT TESTIMONIALS
+            <h2 className="text-2xl md:text-3xl font-extralight tracking-[0.2em] text-black mb-3">
+              THE MAN BEHIND THE CAMERA - MITHU
             </h2>
-            <p className="text-lg text-gray-600 font-light">
-              What our clients say about their experience
-            </p>
-            <div className="w-24 h-px bg-black mx-auto mt-8"></div>
           </motion.div>
 
-          <TestimonialCamera />
+          {/* Photo and About Text Layout - 2 Overlapped Images */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12 items-start">
+            {/* Two Overlapped Diagonal Photos - Takes 2 columns */}
+            <div className="lg:col-span-2 relative h-80">
+              <motion.div
+                initial={{ opacity: 0, rotate: -5 }}
+                whileInView={{ opacity: 1, rotate: -5 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="absolute top-0 left-0 bg-white p-2 shadow-xl w-60 z-10"
+              >
+                <div className="relative h-72 overflow-hidden">
+                  <Image
+                    src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=600&fit=crop"
+                    alt="Mithu Ashwin"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, rotate: 5 }}
+                whileInView={{ opacity: 1, rotate: 5 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+                className="absolute top-10 left-48 bg-white p-2 shadow-xl w-60"
+              >
+                <div className="relative h-72 overflow-hidden">
+                  <Image
+                    src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=400&h=600&fit=crop"
+                    alt="Photography"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* About Text with Icons - Takes 3 columns */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="lg:col-span-3 space-y-4"
+            >
+              <div>
+                <h3 className="text-3xl mb-4 text-gray-800" style={{ fontFamily: 'var(--font-dancing), cursive', fontWeight: '400' }}>Hello everyone, this is Mithu</h3>
+                <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                  I&apos;m a passionate photographer based in the beautiful hills of Coonoor, Nilgiris. 
+                  My journey with photography began in 2013, and since then, I&apos;ve been capturing 
+                  life&apos;s most precious moments.
+                </p>
+                <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                  I believe every moment has a story to tell, and through my lens, I try to preserve 
+                  those fleeting emotions and memories that make life beautiful. From intimate weddings 
+                  to candid portraits, each shoot is a new adventure.
+                </p>
+                <p className="text-gray-700 text-sm leading-relaxed mb-6">
+                  When I&apos;m not behind the camera, you&apos;ll find me exploring the misty hills of 
+                  Nilgiris, always searching for that perfect light and moment to capture.
+                </p>
+
+                {/* Icons Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-gray-700" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-lg font-light text-black">2013</p>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider">Journey Started</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Award className="w-5 h-5 text-gray-700" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-lg font-light text-black">150+</p>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider">Events Captured</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-gray-700" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-lg font-light text-black">Coonoor</p>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider">Based In</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-5 h-5 text-red-500 fill-red-500" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-3xl font-normal text-black">∞</p>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider">Memories Created</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Modern Separator */}
+          <div className="flex items-center justify-center my-16">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            <div className="mx-6">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+          </div>
+
+          {/* One Way Art Studio Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 p-8"
+          >
+            {/* One Way Logo */}
+            <div className="flex justify-center mb-6">
+              <Image
+                src="/logo.png"
+                alt="One Way Art Studio Logo"
+                width={120}
+                height={120}
+                className="object-contain"
+              />
+            </div>
+            
+            <h3 className="text-2xl mb-3 text-black" style={{ fontFamily: 'var(--font-dancing), cursive', fontWeight: '400' }}>One Way Art Studio</h3>
+            <p className="text-base text-gray-600 mb-3">Est. 2018</p>
+            <p className="text-sm text-gray-700 max-w-2xl mx-auto leading-relaxed">
+              Dedicated to capturing the essence of your special moments through exceptional photography and videography. 
+              Every frame tells a story, every moment becomes a cherished memory.
+            </p>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <p className="text-gray-600 mb-8 text-lg font-light max-w-2xl mx-auto">
+              Ready to capture your story? Let&apos;s create something beautiful together
+            </p>
+            <Link
+              href="/book-us"
+              className="inline-flex items-center gap-3 bg-black text-white border-2 border-black px-12 py-4 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300"
+            >
+              <MessageCircle className="w-5 h-5" />
+              BOOK A SESSION
+            </Link>
+          </motion.div>
         </div>
       </section>
     </div>
   );
 }
 
-// Testimonial Camera Lens Component
-function TestimonialCamera() {
-  const [selectedId, setSelectedId] = useState<number>(1);
-
-  const testimonials = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      role: "Bride",
-      image: "https://picsum.photos/seed/face1/200/200",
-      comment: "Mithu captured every precious moment of our wedding day with such artistry and professionalism.",
-      galleryImages: [
-        "https://picsum.photos/seed/wedding1a/800/1000",
-        "https://picsum.photos/seed/wedding1b/800/1000",
-        "https://picsum.photos/seed/wedding1c/800/1000",
-        "https://picsum.photos/seed/wedding1d/800/1000"
-      ]
-    },
-    {
-      id: 2,
-      name: "Rajesh Kumar",
-      role: "Groom",
-      image: "https://picsum.photos/seed/face2/200/200",
-      comment: "The attention to detail and creative composition exceeded our expectations completely.",
-      galleryImages: [
-        "https://picsum.photos/seed/wedding2a/800/1000",
-        "https://picsum.photos/seed/wedding2b/800/1000",
-        "https://picsum.photos/seed/wedding2c/800/1000",
-        "https://picsum.photos/seed/wedding2d/800/1000"
-      ]
-    },
-    {
-      id: 3,
-      name: "Priya Sharma",
-      role: "Bride",
-      image: "https://picsum.photos/seed/face3/200/200",
-      comment: "Professional, patient, and incredibly talented. An absolutely memorable experience.",
-      galleryImages: [
-        "https://picsum.photos/seed/prewedding3a/800/1000",
-        "https://picsum.photos/seed/prewedding3b/800/1000",
-        "https://picsum.photos/seed/prewedding3c/800/1000",
-        "https://picsum.photos/seed/prewedding3d/800/1000"
-      ]
-    },
-    {
-      id: 4,
-      name: "Michael Chen",
-      role: "Corporate Client",
-      image: "https://picsum.photos/seed/face4/200/200",
-      comment: "Outstanding work on our corporate event. Perfectly captured our brand energy.",
-      galleryImages: [
-        "https://picsum.photos/seed/corporate4a/800/1000",
-        "https://picsum.photos/seed/corporate4b/800/1000",
-        "https://picsum.photos/seed/corporate4c/800/1000",
-        "https://picsum.photos/seed/corporate4d/800/1000"
-      ]
-    },
-    {
-      id: 5,
-      name: "Ananya Patel",
-      role: "Portrait Client",
-      image: "https://picsum.photos/seed/face5/200/200",
-      comment: "Truly exceptional artistic vision and technical skill revealed in every frame.",
-      galleryImages: [
-        "https://picsum.photos/seed/portrait5a/800/1000",
-        "https://picsum.photos/seed/portrait5b/800/1000",
-        "https://picsum.photos/seed/portrait5c/800/1000",
-        "https://picsum.photos/seed/portrait5d/800/1000"
-      ]
-    },
-    {
-      id: 6,
-      name: "David Wilson",
-      role: "Groom",
-      image: "https://picsum.photos/seed/face6/200/200",
-      comment: "Seamless process from consultation to final delivery. Unmatched quality throughout.",
-      galleryImages: [
-        "https://picsum.photos/seed/wedding6a/800/1000",
-        "https://picsum.photos/seed/wedding6b/800/1000",
-        "https://picsum.photos/seed/wedding6c/800/1000",
-        "https://picsum.photos/seed/wedding6d/800/1000"
-      ]
-    },
-    {
-      id: 7,
-      name: "Meera Iyer",
-      role: "Bride",
-      image: "https://picsum.photos/seed/face7/200/200",
-      comment: "Captured emotions and candid moments that made our album truly special.",
-      galleryImages: [
-        "https://picsum.photos/seed/wedding7a/800/1000",
-        "https://picsum.photos/seed/wedding7b/800/1000",
-        "https://picsum.photos/seed/wedding7c/800/1000",
-        "https://picsum.photos/seed/wedding7d/800/1000"
-      ]
-    },
-    {
-      id: 8,
-      name: "James Anderson",
-      role: "Event Coordinator",
-      image: "https://picsum.photos/seed/face8/200/200",
-      comment: "Exceptional professionalism and creative vision. Every shot perfectly composed.",
-      galleryImages: [
-        "https://picsum.photos/seed/event8a/800/1000",
-        "https://picsum.photos/seed/event8b/800/1000",
-        "https://picsum.photos/seed/event8c/800/1000",
-        "https://picsum.photos/seed/event8d/800/1000"
-      ]
-    }
-  ];
-
-  const handleTestimonialClick = (id: number) => {
-    if (selectedId !== id) {
-      setSelectedId(id);
-    }
-  };
-
-  const selectedTestimonial = testimonials.find(t => t.id === selectedId);
-  const selectedIndex = testimonials.findIndex(t => t.id === selectedId);
-
-  // Calculate rotation angle to bring selected item to top
-  const rotationAngle = -(selectedIndex * (360 / testimonials.length));
-
-  return (
-    <div className="relative w-full min-h-screen py-16 bg-gray-100">
-      {/* Background Gallery - 4 Images Crystal Clear */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-        <div className="grid grid-cols-4 h-full gap-0">
-          {selectedTestimonial?.galleryImages.map((img, index) => (
-            <motion.div
-              key={`${selectedId}-${index}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: index * 0.1,
-                ease: "easeInOut"
-              }}
-              className="relative h-full bg-gray-200"
-            >
-              <Image
-                src={img}
-                alt={`Gallery ${index + 1}`}
-                width={800}
-                height={1000}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-white/20"></div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Camera Lens - Classic Design */}
-      <div className="relative w-[600px] h-[600px] mx-auto z-10">
-        
-        {/* Single Clean Circle with Border */}
-        <div className="absolute inset-16 rounded-full border-2 border-black bg-white shadow-2xl">
-          
-          {/* Content Display Area - Text Only */}
-          <div className="absolute inset-0 flex items-center justify-center p-16 pointer-events-none z-20">
-            {selectedTestimonial && (
-              <motion.div
-                key={selectedId}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center max-w-sm"
-              >
-                <motion.blockquote 
-                  className="text-base font-light text-gray-800 leading-relaxed mb-8 px-2"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                >
-                  &quot;{selectedTestimonial.comment}&quot;
-                </motion.blockquote>
-                
-                <motion.div 
-                  className="text-center pt-4 border-t border-gray-300"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
-                >
-                  <p className="font-medium text-black text-base tracking-wide mb-1">
-                    {selectedTestimonial.name}
-                  </p>
-                  <p className="text-xs text-gray-600 tracking-[0.25em] font-light">
-                    {selectedTestimonial.role.toUpperCase()}
-                  </p>
-                </motion.div>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Rotating Circle with Testimonial Images */}
-          <motion.div
-            className="absolute inset-0 rounded-full"
-            animate={{ rotate: rotationAngle }}
-            transition={{ 
-              duration: 0.9, 
-              ease: [0.4, 0.0, 0.2, 1]
-            }}
-          >
-            {testimonials.map((testimonial, index) => {
-              const angle = (index * (360 / testimonials.length)) * (Math.PI / 180);
-              const radius = 284; // Exact radius to center on the border (half of container minus inset)
-              const imageSize = 80;
-              const x = Math.cos(angle - Math.PI / 2) * radius;
-              const y = Math.sin(angle - Math.PI / 2) * radius;
-
-              const isSelected = selectedId === testimonial.id;
-
-              return (
-                <motion.div
-                  key={testimonial.id}
-                  className="absolute cursor-pointer"
-                  style={{
-                    left: '50%',
-                    top: '50%',
-                    width: `${imageSize}px`,
-                    height: `${imageSize}px`,
-                    zIndex: isSelected ? 15 : 10
-                  }}
-                  animate={{
-                    x: x - imageSize / 2,
-                    y: y - imageSize / 2,
-                    rotate: -rotationAngle,
-                    scale: isSelected ? 1.1 : 1
-                  }}
-                  transition={{ 
-                    duration: 0.9, 
-                    ease: [0.4, 0.0, 0.2, 1]
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTestimonialClick(testimonial.id);
-                  }}
-                  whileHover={{ scale: isSelected ? 1.15 : 1.05 }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <div className="relative w-full h-full">
-                    {/* Selection Ring */}
-                    {isSelected && (
-                      <motion.div
-                        className="absolute -inset-2 rounded-full border-2 border-black"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    )}
-                    
-                    {/* Image with White Border */}
-                    <div className="w-full h-full rounded-full border-4 border-white shadow-xl overflow-hidden">
-                      <Image
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    {/* Additional Ring for Selected */}
-                    {isSelected && (
-                      <div className="absolute inset-0 rounded-full ring-2 ring-black ring-offset-2 ring-offset-white"></div>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
-
-
-      </div>
-
-      {/* Instructions */}
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-center">
-        <p className="text-gray-400 text-xs font-light tracking-[0.15em]">
-          SELECT TO VIEW TESTIMONIAL
-        </p>
-      </div>
-    </div>
-  );
-}

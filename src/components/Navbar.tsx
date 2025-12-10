@@ -1,10 +1,49 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
+
+function LogoWithDoubleClick() {
+  const router = useRouter();
+  const clickTimer = useRef<NodeJS.Timeout | null>(null);
+  const [clicks, setClicks] = useState(0);
+
+  const handleClick = useCallback(() => {
+    if (clicks === 0) {
+      // First click
+      setClicks(1);
+      clickTimer.current = setTimeout(() => {
+        setClicks(0);
+        // Single click action - navigate home
+        router.push('/');
+      }, 250);
+    } else {
+      // Second click
+      clearTimeout(clickTimer.current!);
+      setClicks(0);
+      // Double click action - navigate to admin
+      router.push('/admin/blogs');
+    }
+  }, [clicks, router]);
+
+  return (
+    <div onClick={handleClick} className="cursor-pointer flex items-center">
+      <div className="w-16 h-16 relative">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          {/* Chevron */}
+          <path d="M 20 60 L 50 30 L 80 60" fill="none" stroke="black" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* ONE */}
+          <text x="50" y="75" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">ÔNE</text>
+          {/* WAY */}
+          <text x="50" y="95" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">WAY</text>
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -31,23 +70,12 @@ export default function Navbar() {
             whileTap={{ scale: 0.95 }}
             className="flex items-center w-1/3"
           >
-            <Link href="/" className="flex items-center">
-              <div className="w-16 h-16 relative">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  {/* Chevron */}
-                  <path d="M 20 60 L 50 30 L 80 60" fill="none" stroke="black" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* ONE */}
-                  <text x="50" y="75" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">ÔNE</text>
-                  {/* WAY */}
-                  <text x="50" y="95" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">WAY</text>
-                </svg>
-              </div>
-            </Link>
+            <LogoWithDoubleClick />
           </motion.div>
 
           {/* Center Text - "by Mithu Ashwin" in cursive */}
           <div className="hidden md:flex justify-center w-1/3">
-            <span className="font-['Dancing_Script'] text-2xl text-black">by Mithu Ashwin</span>
+            <span className="font-dancing text-xl text-black">by Mithu Ashwin</span>
           </div>
 
           {/* Desktop Navigation - Right */}
@@ -82,7 +110,7 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center gap-4">
-            <span className="font-['Dancing_Script'] text-lg text-black">by Mithu Ashwin</span>
+            <span className="font-dancing text-base text-black">by Mithu Ashwin</span>
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsMenuOpen(!isMenuOpen)}

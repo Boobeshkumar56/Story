@@ -2,15 +2,18 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Save, Lock } from 'lucide-react';
+import { Plus, Trash2, Save, Lock, Upload, X, Heart, Eye, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import ImageUploader from '@/components/ImageUploader';
 
 export default function AdminBlogs() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [uploadError, setUploadError] = useState<string>('');
 
   const [formData, setFormData] = useState({
+    folderName: '',
     title: '',
     excerpt: '',
     description: '',
@@ -19,7 +22,10 @@ export default function AdminBlogs() {
     location: '',
     eventDate: '',
     coverImage: '',
-    galleryImages: [''],
+    galleryImages: [] as string[],
+    addToRecentWorks: true,
+    addToLibrary: true,
+    addToBlogs: true,
   });
 
   const categories = ['Wedding', 'Pre-Wedding', 'Portrait', 'Event'];
@@ -41,20 +47,20 @@ export default function AdminBlogs() {
     });
   };
 
-  const addGalleryImage = () => {
+  const handleCoverImageUpload = (url: string) => {
     setFormData({
       ...formData,
-      galleryImages: [...formData.galleryImages, '']
+      coverImage: url
     });
+    setUploadError('');
   };
 
-  const updateGalleryImage = (index: number, value: string) => {
-    const newGalleryImages = [...formData.galleryImages];
-    newGalleryImages[index] = value;
+  const handleGalleryImageUpload = (url: string) => {
     setFormData({
       ...formData,
-      galleryImages: newGalleryImages
+      galleryImages: [...formData.galleryImages, url]
     });
+    setUploadError('');
   };
 
   const removeGalleryImage = (index: number) => {
@@ -65,31 +71,94 @@ export default function AdminBlogs() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Blog data to save:', formData);
-    
-    // Here you would typically:
-    // 1. Validate the data
-    // 2. Send to your backend API
-    // 3. Save to database
-    // 4. Show success message
-    
-    alert('Blog post created successfully! (This is a demo - implement backend integration)');
-    
-    // Reset form
+  const handleUploadError = (error: string) => {
+    setUploadError(error);
+    setTimeout(() => setUploadError(''), 5000);
+  };
+
+  const handleCheckboxChange = (field: string) => {
     setFormData({
-      title: '',
-      excerpt: '',
-      description: '',
-      category: 'Wedding',
-      date: new Date().toISOString().split('T')[0],
-      location: '',
-      eventDate: '',
-      coverImage: '',
-      galleryImages: [''],
+      ...formData,
+      [field]: !formData[field as keyof typeof formData]
     });
-    setShowForm(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.folderName.trim()) {
+      setUploadError('Please enter a folder name for Cloudinary storage');
+      return;
+    }
+    
+    if (!formData.coverImage) {
+      setUploadError('Please upload a cover image');
+      return;
+    }
+    
+    if (formData.galleryImages.length === 0) {
+      setUploadError('Please upload at least one gallery image');
+      return;
+    }
+    
+    try {
+      // Save event metadata to Cloudinary
+      const response = await fetch('/api/metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderName: formData.folderName.trim(),
+          title: formData.title,
+          excerpt: formData.excerpt,
+          description: formData.description,
+          category: formData.category,
+          date: formData.date,
+          location: formData.location,
+          eventDate: formData.eventDate,
+          coverImage: formData.coverImage,
+          addToRecentWorks: formData.addToRecentWorks,
+          addToLibrary: formData.addToLibrary,
+          addToBlogs: formData.addToBlogs
+        })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save event');
+      }
+
+      // Update local folder list
+      const existingFolders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+      const cleanFolderName = formData.folderName.trim();
+      if (!existingFolders.includes(cleanFolderName)) {
+        localStorage.setItem('eventFolders', JSON.stringify([cleanFolderName, ...existingFolders]));
+      }
+
+      alert('Event uploaded successfully! All images and metadata are now in Cloudinary.');
+      
+      // Reset form
+      setFormData({
+        folderName: '',
+        title: '',
+        excerpt: '',
+        description: '',
+        category: 'Wedding',
+        date: new Date().toISOString().split('T')[0],
+        location: '',
+        eventDate: '',
+        coverImage: '',
+        galleryImages: [],
+        addToRecentWorks: true,
+        addToLibrary: true,
+        addToBlogs: true,
+      });
+      setShowForm(false);
+    } catch (error: any) {
+      setUploadError(error.message || 'Failed to upload event');
+      console.error('Upload error:', error);
+    }
   };
 
   if (!isAuthenticated) {
@@ -109,7 +178,7 @@ export default function AdminBlogs() {
           
           <h1 className="text-2xl font-light text-center mb-2">Admin Access</h1>
           <p className="text-gray-600 text-center mb-8 text-sm">
-            Enter password to manage blog posts
+            Enter password to manage content
           </p>
           
           <form onSubmit={handleLogin} className="space-y-4">
@@ -157,8 +226,8 @@ export default function AdminBlogs() {
         <div className="max-w-7xl mx-auto px-8 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-light mb-2">Blog Management</h1>
-              <p className="text-gray-600">Create and manage your blog posts</p>
+              <h1 className="text-3xl font-light mb-2">Content Management</h1>
+              <p className="text-gray-600">Upload events to Blogs, Library & Recent Works</p>
             </div>
             <div className="flex gap-4">
               <Link
@@ -169,7 +238,7 @@ export default function AdminBlogs() {
               </Link>
               <button
                 onClick={() => setIsAuthenticated(false)}
-                className="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
               >
                 Logout
               </button>
@@ -191,16 +260,16 @@ export default function AdminBlogs() {
               <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
                 <Plus className="text-white" size={40} />
               </div>
-              <h2 className="text-2xl font-light mb-4">Create New Blog Post</h2>
+              <h2 className="text-2xl font-light mb-4">Upload New Event</h2>
               <p className="text-gray-600 mb-8">
-                Share your latest photography story with beautiful galleries
+                Upload event photos and update your website sections
               </p>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-black text-white px-8 py-3 rounded hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
               >
                 <Plus size={20} />
-                New Blog Post
+                New Event Upload
               </button>
             </div>
           </motion.div>
@@ -211,9 +280,48 @@ export default function AdminBlogs() {
             transition={{ duration: 0.5 }}
             className="bg-white rounded-lg shadow-md p-8"
           >
-            <h2 className="text-2xl font-light mb-8">Create New Blog Post</h2>
+            <h2 className="text-2xl font-light mb-8">Upload New Event</h2>
+            
+            {uploadError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between"
+              >
+                <p className="text-red-600 text-sm">{uploadError}</p>
+                <button
+                  onClick={() => setUploadError('')}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X size={18} />
+                </button>
+              </motion.div>
+            )}
             
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Cloudinary Folder Name */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium border-b pb-2">Storage Settings</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Folder Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="folderName"
+                    value={formData.folderName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., sarah-john-wedding-2024"
+                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-black transition-colors"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    All images will be organized in this folder in Cloudinary
+                  </p>
+                </div>
+              </div>
+
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium border-b pb-2">Basic Information</h3>
@@ -333,20 +441,34 @@ export default function AdminBlogs() {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium border-b pb-2">Cover Image</h3>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Image URL *
-                  </label>
-                  <input
-                    type="url"
-                    name="coverImage"
-                    value={formData.coverImage}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-black transition-colors"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
+                <div className="space-y-3">
+                  {!formData.coverImage ? (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <Upload className="mx-auto mb-4 text-gray-400" size={48} />
+                      <p className="text-gray-600 mb-4">Upload cover image from your device</p>
+                      <ImageUploader
+                        onUploadComplete={handleCoverImageUpload}
+                        onError={handleUploadError}
+                        folder={formData.folderName || 'events'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={formData.coverImage}
+                        alt="Cover preview"
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, coverImage: '' })}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500">
                     This image will be displayed in the blog list
                   </p>
                 </div>
@@ -356,45 +478,101 @@ export default function AdminBlogs() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b pb-2">
                   <h3 className="text-lg font-medium">Gallery Images</h3>
-                  <button
-                    type="button"
-                    onClick={addGalleryImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors text-sm"
-                  >
-                    <Plus size={16} />
-                    Add Image
-                  </button>
+                  <span className="text-sm text-gray-500">
+                    {formData.galleryImages.length} image(s)
+                  </span>
                 </div>
 
-                <div className="space-y-3">
-                  {formData.galleryImages.map((image, index) => (
-                    <div key={index} className="flex gap-2">
-                      <div className="flex-1">
-                        <input
-                          type="url"
-                          value={image}
-                          onChange={(e) => updateGalleryImage(index, e.target.value)}
-                          placeholder={`Gallery image ${index + 1} URL`}
-                          className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-black transition-colors"
-                          required
+                {/* Upload new gallery image */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="mx-auto mb-3 text-gray-400" size={40} />
+                  <p className="text-gray-600 mb-3 text-sm">Select up to 8 images at once</p>
+                  <ImageUploader
+                    onUploadComplete={handleGalleryImageUpload}
+                    onError={handleUploadError}
+                    folder={formData.folderName || 'events'}
+                    multiple={true}
+                    maxFiles={8}
+                  />
+                </div>
+
+                {/* Display uploaded gallery images */}
+                {formData.galleryImages.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {formData.galleryImages.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Gallery image ${index + 1}`}
+                          className="w-full h-40 object-cover rounded-lg"
                         />
-                      </div>
-                      {formData.galleryImages.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeGalleryImage(index)}
-                          className="px-4 py-3 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full 
+                                   opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={16} />
                         </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white 
+                                      px-2 py-1 rounded text-xs">
+                          Image {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
                 <p className="text-xs text-gray-500">
                   Add 4-8 high-quality images from the event
                 </p>
+              </div>
+
+              {/* Where to Display */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium border-b pb-2">Display Sections</h3>
+                <p className="text-sm text-gray-600">Select where this event should appear</p>
+                
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formData.addToBlogs}
+                      onChange={() => handleCheckboxChange('addToBlogs')}
+                      className="w-5 h-5 accent-black cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium">Blogs Page</div>
+                      <div className="text-sm text-gray-500">Show as a blog post with full details</div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formData.addToRecentWorks}
+                      onChange={() => handleCheckboxChange('addToRecentWorks')}
+                      className="w-5 h-5 accent-black cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium">Recent Works</div>
+                      <div className="text-sm text-gray-500">Add to recent works section (will appear first)</div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formData.addToLibrary}
+                      onChange={() => handleCheckboxChange('addToLibrary')}
+                      className="w-5 h-5 accent-black cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium">Library</div>
+                      <div className="text-sm text-gray-500">Add to photography library</div>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -404,7 +582,7 @@ export default function AdminBlogs() {
                   className="flex-1 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                 >
                   <Save size={20} />
-                  Publish Blog Post
+                  Upload Event
                 </button>
                 <button
                   type="button"

@@ -1,39 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, Facebook } from 'lucide-react';
 
+interface EventMetadata {
+  folderName: string;
+  title: string;
+  description: string;
+  coverImageUrl: string;
+  date: string;
+  addToLibrary?: boolean;
+}
+
+interface GalleryImage {
+  src: string;
+  title: string;
+  date: string;
+  folderName: string;
+}
+
 export default function Library() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = ['All', 'Weddings', 'Portraits', 'Events', 'Fashion'];
+  useEffect(() => {
+    const fetchLibraryImages = async () => {
+      try {
+        setLoading(true);
+        
+        // Get all event folders from localStorage
+        const folders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+        
+        if (folders.length === 0) {
+          // No folders, show empty state
+          setGalleryImages([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Fetch metadata and images for each folder
+        const allImages: GalleryImage[] = [];
+        
+        await Promise.all(
+          folders.map(async (folderName: string) => {
+            try {
+              const metadataRes = await fetch(`/api/metadata?folder=${encodeURIComponent(folderName)}`);
+              if (!metadataRes.ok) return;
+              
+              const metadata: EventMetadata = await metadataRes.json();
+              
+              // Only include if addToLibrary is true
+              if (!metadata.addToLibrary) return;
+              
+              // Fetch all images from the folder
+              const imagesRes = await fetch(`/api/folder-images?folder=${encodeURIComponent(folderName)}`);
+              if (!imagesRes.ok) return;
+              
+              const imagesData = await imagesRes.json();
+              
+              // Add all images from this folder to the gallery (only real Cloudinary images)
+              if (imagesData.images && imagesData.images.length > 0) {
+                imagesData.images.forEach((imageUrl: string) => {
+                  allImages.push({
+                    src: imageUrl,
+                    title: metadata.title,
+                    date: metadata.date,
+                    folderName: folderName
+                  });
+                });
+              }
+            } catch (error) {
+              console.error(`Error fetching library images for ${folderName}:`, error);
+            }
+          })
+        );
+        
+        // Only set real Cloudinary images, no mock data
+        setGalleryImages(allImages);
+      } catch (error) {
+        console.error('Error fetching library images:', error);
+        setGalleryImages([]); // Show empty state on error
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const galleryImages = [
-    { src: 'https://picsum.photos/800/1200?random=20', category: 'Weddings', title: 'Sacred Vows', year: '2024' },
-    { src: 'https://picsum.photos/600/800?random=21', category: 'Portraits', title: 'Inner Light', year: '2024' },
-    { src: 'https://picsum.photos/900/600?random=22', category: 'Fashion', title: 'Modern Grace', year: '2023' },
-    { src: 'https://picsum.photos/700/1000?random=23', category: 'Weddings', title: 'First Dance', year: '2024' },
-    { src: 'https://picsum.photos/800/800?random=24', category: 'Portraits', title: 'Authentic Self', year: '2023' },
-    { src: 'https://picsum.photos/600/900?random=25', category: 'Events', title: 'Celebration', year: '2024' },
-    { src: 'https://picsum.photos/1000/700?random=26', category: 'Fashion', title: 'Elegance', year: '2023' },
-    { src: 'https://picsum.photos/800/1100?random=27', category: 'Weddings', title: 'Golden Hour', year: '2024' },
-    { src: 'https://picsum.photos/700/800?random=28', category: 'Portraits', title: 'Silent Stories', year: '2023' },
-    { src: 'https://picsum.photos/900/1200?random=29', category: 'Events', title: 'Milestone', year: '2024' },
-    { src: 'https://picsum.photos/600/700?random=30', category: 'Fashion', title: 'Style Statement', year: '2023' },
-    { src: 'https://picsum.photos/800/900?random=31', category: 'Weddings', title: 'Eternal Love', year: '2024' },
-    { src: 'https://picsum.photos/750/1000?random=32', category: 'Portraits', title: 'Depth of Soul', year: '2023' },
-    { src: 'https://picsum.photos/850/600?random=33', category: 'Events', title: 'Joyful Gathering', year: '2024' },
-    { src: 'https://picsum.photos/700/900?random=34', category: 'Fashion', title: 'Contemporary', year: '2023' },
-    { src: 'https://picsum.photos/600/800?random=35', category: 'Weddings', title: 'Promise', year: '2024' },
-  ];
-
-  const filteredImages = selectedCategory === 'All' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === selectedCategory);
+    fetchLibraryImages();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -76,70 +133,58 @@ export default function Library() {
             </p>
             <div className="w-24 h-px bg-black mx-auto"></div>
           </motion.div>
-
-          {/* Category Filter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex justify-center space-x-8"
-          >
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`text-sm tracking-[0.2em] transition-opacity duration-300 ${
-                  selectedCategory === category
-                    ? 'opacity-100 border-b border-black pb-1'
-                    : 'opacity-60 hover:opacity-100'
-                }`}
-              >
-                {category.toUpperCase()}
-              </button>
-            ))}
-          </motion.div>
         </div>
       </section>
 
       {/* Gallery Grid */}
       <section className="pb-20 px-8 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            layout
-            className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-8"
-          >
-            <AnimatePresence>
-              {filteredImages.map((image, index) => (
-                <motion.div
-                  key={`${selectedCategory}-${index}`}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="group cursor-pointer mb-8 break-inside-avoid"
-                  onClick={() => setSelectedImage(image.src)}
-                >
-                  <div className="relative overflow-hidden">
-                    <Image
-                      src={image.src}
-                      alt={image.title}
-                      width={400}
-                      height={600}
-                      className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-                    <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="text-white">
-                        <p className="text-sm font-light tracking-wide">{image.title}</p>
-                        <p className="text-xs tracking-[0.2em] opacity-80">{image.category.toUpperCase()} • {image.year}</p>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="text-gray-600">Loading library...</div>
+            </div>
+          ) : galleryImages.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-600">No images in library yet.</p>
+            </div>
+          ) : (
+            <motion.div
+              layout
+              className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-8"
+            >
+              <AnimatePresence>
+                {galleryImages.map((image, index) => (
+                  <motion.div
+                    key={`${image.folderName}-${index}`}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    className="group cursor-pointer mb-8 break-inside-avoid"
+                    onClick={() => setSelectedImage(image.src)}
+                  >
+                    <div className="relative overflow-hidden">
+                      <Image
+                        src={image.src}
+                        alt={image.title}
+                        width={400}
+                        height={600}
+                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                      <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="text-white">
+                          <p className="text-sm font-light tracking-wide">{image.title}</p>
+                          <p className="text-xs tracking-[0.2em] opacity-80">{image.date}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
         </div>
       </section>
 

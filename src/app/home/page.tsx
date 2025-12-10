@@ -1,23 +1,112 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Instagram, Facebook, Camera, Image as ImageIcon, Aperture, Focus } from 'lucide-react';
 import LibraryModal from '@/components/LibraryModal';
 
+interface RecentWork {
+  src: string;
+  title: string;
+  location: string;
+}
+
 export default function Home() {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [recentWorks, setRecentWorks] = useState<RecentWork[]>([]);
   
-  const recentWorks = [
-    { src: 'https://picsum.photos/800/1000?random=1', title: 'PORTRAIT SESSION', location: 'Coonoor, 2024' },
-    { src: 'https://picsum.photos/800/1000?random=2', title: 'WEDDING DAY', location: 'Ooty, 2024' },
-    { src: 'https://picsum.photos/800/1000?random=3', title: 'PRE-WEDDING SHOOT', location: 'Nilgiris, 2024' },
-    { src: 'https://picsum.photos/800/1000?random=4', title: 'ENGAGEMENT', location: 'Coimbatore, 2024' },
-    { src: 'https://picsum.photos/800/1000?random=5', title: 'RECEPTION', location: 'Kerala, 2024' },
-    { src: 'https://picsum.photos/800/1000?random=6', title: 'CANDID MOMENTS', location: 'Chennai, 2024' },
+  // Mock data as fallback
+  const mockWorks: RecentWork[] = [
+    { src: 'https://picsum.photos/1200/800?random=1', title: 'PORTRAIT SESSION', location: 'Coonoor, 2024' },
+    { src: 'https://picsum.photos/800/1200?random=2', title: 'WEDDING DAY', location: 'Ooty, 2024' },
+    { src: 'https://picsum.photos/800/600?random=3', title: 'PRE-WEDDING SHOOT', location: 'Nilgiris, 2024' },
+    { src: 'https://picsum.photos/800/600?random=4', title: 'ENGAGEMENT', location: 'Coimbatore, 2024' },
+    { src: 'https://picsum.photos/800/1200?random=5', title: 'RECEPTION', location: 'Kerala, 2024' },
+    { src: 'https://picsum.photos/1200/800?random=6', title: 'CANDID MOMENTS', location: 'Chennai, 2024' },
+    { src: 'https://picsum.photos/1200/800?random=7', title: 'FAMILY PORTRAITS', location: 'Bangalore, 2024' },
   ];
+
+  useEffect(() => {
+    const fetchRecentWorks = async () => {
+      try {
+        // Get all event folders from localStorage
+        const folders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+        console.log('Recent Works - Folders from localStorage:', folders);
+        
+        if (folders.length === 0) {
+          // No Cloudinary data, use mock data
+          console.log('Recent Works - No folders, using mock data');
+          setRecentWorks(mockWorks);
+          return;
+        }
+        
+        // Fetch metadata for each folder
+        const worksData = await Promise.all(
+          folders.map(async (folderName: string) => {
+            try {
+              const metadataRes = await fetch(`/api/metadata?folder=${encodeURIComponent(folderName)}`);
+              if (!metadataRes.ok) {
+                console.log(`Recent Works - Failed to fetch metadata for ${folderName}`);
+                return null;
+              }
+              
+              const response = await metadataRes.json();
+              const metadata = response.metadata; // Extract metadata from response
+              console.log(`Recent Works - Metadata for ${folderName}:`, metadata);
+              console.log(`Recent Works - addToRecentWorks flag:`, metadata.addToRecentWorks);
+              
+              // Only include if addToRecentWorks is true
+              if (!metadata.addToRecentWorks) {
+                console.log(`Recent Works - Skipping ${folderName} (addToRecentWorks is false)`);
+                return null;
+              }
+              
+              return {
+                src: metadata.coverImage, // Use coverImage from metadata
+                title: metadata.title.toUpperCase(),
+                location: metadata.date
+              };
+            } catch (error) {
+              console.error(`Error fetching work ${folderName}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        // Filter out null values
+        const validWorks = worksData.filter((w): w is RecentWork => w !== null);
+        console.log('Recent Works - Valid Cloudinary works:', validWorks);
+        
+        // If we have Cloudinary works, pad with mock data if needed to reach 7 items
+        if (validWorks.length > 0) {
+          const totalNeeded = 7;
+          const remaining = totalNeeded - validWorks.length;
+          if (remaining > 0) {
+            // Add mock data to fill up to 7 items
+            const finalWorks = [...validWorks, ...mockWorks.slice(0, remaining)];
+            console.log('Recent Works - Padded with mock data:', finalWorks);
+            setRecentWorks(finalWorks);
+          } else {
+            // Use only Cloudinary data (take first 7 if more)
+            const finalWorks = validWorks.slice(0, 7);
+            console.log('Recent Works - Using Cloudinary data only:', finalWorks);
+            setRecentWorks(finalWorks);
+          }
+        } else {
+          // No valid Cloudinary works, use all mock
+          console.log('Recent Works - No valid works, using all mock data');
+          setRecentWorks(mockWorks);
+        }
+      } catch (error) {
+        console.error('Error fetching recent works:', error);
+        setRecentWorks(mockWorks); // Fallback to mock on error
+      }
+    };
+
+    fetchRecentWorks();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -118,132 +207,41 @@ export default function Home() {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="grid grid-cols-12 auto-rows-[100px] gap-4">
-              {/* Image 1 - Large */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                viewport={{ once: true }}
-                className="col-span-12 md:col-span-5 row-span-4 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[0].src}
-                  alt={recentWorks[0].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-6 left-6 text-white z-10">
-                  <h4 className="text-xl font-light tracking-wide mb-2">{recentWorks[0].title}</h4>
-                  <p className="text-gray-300 font-light">{recentWorks[0].location}</p>
-                </div>
-              </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-6 auto-rows-[200px] gap-1">
+              {recentWorks.map((work, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className={`relative overflow-hidden cursor-pointer group
+                    ${index === 0 ? 'md:col-span-4 md:row-span-2' : ''} 
+                    ${index === 1 ? 'md:col-span-2 md:row-span-2' : ''}
+                    ${index === 2 ? 'md:col-span-2 md:row-span-1' : ''}
+                    ${index === 3 ? 'md:col-span-2 md:row-span-1' : ''}
+                    ${index === 4 ? 'md:col-span-2 md:row-span-2' : ''}
+                    ${index === 5 ? 'md:col-span-3 md:row-span-2' : ''}
+                    ${index === 6 ? 'md:col-span-3 md:row-span-2' : ''}
+                  `}
+                >
+                  <Image
+                    src={work.src}
+                    alt={work.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
+                  <div className="absolute bottom-6 left-6 text-white z-10">
+                    <h4 className="text-xl font-light tracking-wide mb-2">{work.title}</h4>
+                    <p className="text-gray-300 font-light">{work.location}</p>
+                  </div>
+                </motion.div>
+              ))}
 
-              {/* Image 2 - Medium Tall */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: true }}
-                className="col-span-12 md:col-span-4 row-span-3 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[1].src}
-                  alt={recentWorks[1].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-4 left-4 text-white z-10">
-                  <h4 className="text-lg font-light tracking-wide mb-1">{recentWorks[1].title}</h4>
-                  <p className="text-gray-300 font-light text-sm">{recentWorks[1].location}</p>
-                </div>
-              </motion.div>
 
-              {/* Image 3 - Small Square */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                viewport={{ once: true }}
-                className="col-span-6 md:col-span-3 row-span-3 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[2].src}
-                  alt={recentWorks[2].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-4 left-4 text-white z-10">
-                  <h4 className="text-base font-light tracking-wide mb-1">{recentWorks[2].title}</h4>
-                  <p className="text-gray-300 font-light text-xs">{recentWorks[2].location}</p>
-                </div>
-              </motion.div>
 
-              {/* Image 4 - Wide */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="col-span-12 md:col-span-7 row-span-3 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[3].src}
-                  alt={recentWorks[3].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-4 left-4 text-white z-10">
-                  <h4 className="text-lg font-light tracking-wide mb-1">{recentWorks[3].title}</h4>
-                  <p className="text-gray-300 font-light text-sm">{recentWorks[3].location}</p>
-                </div>
-              </motion.div>
 
-              {/* Image 5 - Tall */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                viewport={{ once: true }}
-                className="col-span-6 md:col-span-4 row-span-4 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[4].src}
-                  alt={recentWorks[4].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-6 left-6 text-white z-10">
-                  <h4 className="text-lg font-light tracking-wide mb-2">{recentWorks[4].title}</h4>
-                  <p className="text-gray-300 font-light">{recentWorks[4].location}</p>
-                </div>
-              </motion.div>
-
-              {/* Image 6 - Medium */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                viewport={{ once: true }}
-                className="col-span-6 md:col-span-5 row-span-4 bg-gray-800 relative overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={recentWorks[5].src}
-                  alt={recentWorks[5].title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
-                <div className="absolute bottom-6 left-6 text-white z-10">
-                  <h4 className="text-lg font-light tracking-wide mb-2">{recentWorks[5].title}</h4>
-                  <p className="text-gray-300 font-light">{recentWorks[5].location}</p>
-                </div>
-              </motion.div>
             </div>
 
             {/* Floating Camera Icons */}

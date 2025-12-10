@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Dancing_Script, Playfair_Display, Inter } from "next/font/google";
+import { Dancing_Script, Playfair_Display, Inter, Allura } from "next/font/google";
 import "./globals.css";
 import ConditionalNavbar from "../components/ConditionalNavbar";
 
@@ -7,6 +7,14 @@ const dancingScript = Dancing_Script({
   variable: "--font-dancing",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400"],
+});
+
+const allura = Allura({
+  variable: "--font-allura",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
 });
 
 const playfair = Playfair_Display({
@@ -34,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${dancingScript.variable} ${playfair.variable} ${inter.variable} antialiased bg-white text-black`}
+        className={`${dancingScript.variable} ${allura.variable} ${playfair.variable} ${inter.variable} antialiased bg-white text-black`}
       >
         <ConditionalNavbar />
         <main>

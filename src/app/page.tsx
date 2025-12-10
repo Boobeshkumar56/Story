@@ -83,16 +83,16 @@ export default function Welcome() {
             {/* Content Overlay - Centered */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center px-6">
         {/* Main Tagline - Now in cursive */}
-        <h2 className="font-['Dancing_Script'] text-4xl md:text-5xl lg:text-6xl mb-8 leading-tight max-w-4xl font-normal">
+        <h2 className="font-dancing text-2xl md:text-3xl lg:text-4xl mb-8 leading-tight max-w-4xl">
           Finding beauty in every moment,
           <br />
           connecting through the lens.
         </h2>
 
         {/* Brand Title - Now below tagline */}
-        <h1 className="text-base md:text-lg mb-10 font-light flex items-center gap-2">
+        <h1 className="text-sm md:text-base mb-10 font-light flex items-center gap-2">
           <span className="tracking-[0.3em]">STORIES</span>
-          <span className="font-['Dancing_Script'] text-2xl md:text-3xl">♡</span>
+          <span className="font-dancing text-xl md:text-2xl">♡</span>
           <span className="tracking-[0.3em]">BY MITHU ASHWIN</span>
         </h1>
 
