@@ -25,6 +25,7 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   
   const categories = ['All', 'Wedding', 'Pre-Wedding', 'Portrait', 'Event', 'Birthday'];
 
@@ -180,18 +181,36 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all cursor-pointer hover:border-gray-400 [&>option]:py-2 [&>option]:px-4 [&>option]:bg-white [&>option]:text-black [&>option]:hover:bg-gray-100"
+                      <button
+                        type="button"
+                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                        className="inline-flex items-center justify-between min-w-[140px] text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all whitespace-nowrap"
                       >
-                        {categories.map(cat => (
-                          <option key={cat} value={cat} className="py-2 px-4 hover:bg-gray-100">{cat}</option>
-                        ))}
-                      </select>
-                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                        {selectedCategory}
+                        <svg className="w-4 h-4 ms-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isCategoryOpen && (
+                        <div className="absolute z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg min-w-[140px]">
+                          <ul className="p-2 text-sm text-gray-700 font-medium">
+                            {categories.map(cat => (
+                              <li key={cat}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCategory(cat);
+                                    setIsCategoryOpen(false);
+                                  }}
+                                  className="inline-flex items-center w-full p-2 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors text-left whitespace-nowrap"
+                                >
+                                  {cat}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </motion.div>
                   </div>
 

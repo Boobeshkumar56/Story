@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Instagram, Facebook, Calendar, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Calendar, Clock } from 'lucide-react';
 
 export default function BookUs() {
   const [formData, setFormData] = useState({
@@ -15,6 +15,8 @@ export default function BookUs() {
     location: '',
     message: ''
   });
+  const [isEventTypeOpen, setIsEventTypeOpen] = useState(false);
+  const eventTypes = ['Wedding', 'Portrait Session', 'Event', 'Other'];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -218,20 +220,12 @@ export default function BookUs() {
               <div className="mt-12">
                 <div className="flex space-x-6">
                   <a
-                    href="https://instagram.com/mithuashwin"
+                    href="https://www.instagram.com/one_way_art_studio?igsh=aGR1b3lsNTNjc3Ay"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-600 hover:text-black transition-colors"
                   >
                     <Instagram size={24} />
-                  </a>
-                  <a
-                    href="https://facebook.com/mithuashwin"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-black transition-colors"
-                  >
-                    <Facebook size={24} />
                   </a>
                 </div>
               </div>
@@ -295,20 +289,37 @@ export default function BookUs() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <select
-                      name="eventType"
-                      value={formData.eventType}
-                      onChange={handleInputChange}
-                      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-600 transition-colors bg-transparent text-lg font-medium cursor-pointer hover:border-gray-600"
-                      required
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsEventTypeOpen(!isEventTypeOpen)}
+                      className="inline-flex items-center justify-between w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all whitespace-nowrap"
                     >
-                      <option value="">Event Type</option>
-                      <option value="wedding">Wedding</option>
-                      <option value="portrait">Portrait Session</option>
-                      <option value="event">Event</option>
-                      <option value="other">Other</option>
-                    </select>
+                      {formData.eventType || 'Event Type'}
+                      <svg className="w-4 h-4 ms-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isEventTypeOpen && (
+                      <div className="absolute z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg w-full">
+                        <ul className="p-2 text-sm text-gray-700 font-medium">
+                          {eventTypes.map(type => (
+                            <li key={type}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, eventType: type });
+                                  setIsEventTypeOpen(false);
+                                }}
+                                className="inline-flex items-center w-full p-2 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors text-left whitespace-nowrap"
+                              >
+                                {type}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <input

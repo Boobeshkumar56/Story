@@ -40,7 +40,7 @@ export default function Home() {
                 <circle cx="10" cy="10" r="1.5" fill="#000" opacity="0.2"/>
                 <circle cx="40" cy="40" r="1" fill="#000" opacity="0.15"/>
                 <circle cx="70" cy="70" r="1.5" fill="#000" opacity="0.2"/>
-                <path d="M 0 40 Q 20 35 40 40 T 80 40" stroke="#000" stroke-width="0.5" fill="none" opacity="0.1"/>
+                <path d="M 0 40 Q 20 35 40 40 T 80 40" stroke="#000" strokeWidth="0.5" fill="none" opacity="0.1"/>
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#elegant-pattern)" />
@@ -279,7 +279,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 px-8 md:px-12 bg-white border-t border-gray-200">
+      <footer className="py-16 px-8 md:px-12 bg-white border-t border-gray-200 relative">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center">
             <div>
@@ -290,15 +290,46 @@ export default function Home() {
                 COONOOR, NILGIRIS • EST. 2018
               </p>
             </div>
-            <div>
+            <div className="flex items-center gap-4">
               <a
-                href="https://instagram.com/mithuashwin"
+                href="https://www.instagram.com/mithu_ashwin?igsh=eGF1cHFkbThndmxy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-black transition-colors inline-block"
               >
-                <Instagram size={32} />
+                <Instagram size={28} />
               </a>
+
+              {/* Developer Signature */}
+              <motion.a
+                href="https://www.linkedin.com/in/boobesh-kumar-b99b90281?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group cursor-pointer relative"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1, duration: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="w-20 h-20">
+                  <img
+                    src="/SIGN.png"
+                    alt="Boobesh Kumar"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                
+                {/* Tooltip */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileHover={{ opacity: 1, y: 0 }}
+                  className="absolute bottom-full mb-3 right-0 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-xl"
+                >
+                  <span className="font-dancing">Made by Boobesh Kumar</span>
+                  <div className="absolute bottom-0 right-4 translate-y-1/2 rotate-45 w-2 h-2 bg-black"></div>
+                </motion.div>
+              </motion.a>
             </div>
           </div>
         </div>

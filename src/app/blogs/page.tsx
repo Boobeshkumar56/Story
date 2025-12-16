@@ -187,18 +187,19 @@ export default function Blogs() {
 
                         {/* Stats */}
                         <div className="flex items-center gap-4 text-xs text-gray-300">
-                        <span className="flex items-center gap-2">
-                          <Heart size={16} />
-                          {post.likes || 0}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <Eye size={16} />
-                          {post.views || 0}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </span>
+                          <span className="flex items-center gap-2">
+                            <Heart size={16} />
+                            {post.likes || 0}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <Eye size={16} />
+                            {post.views || 0}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <Calendar size={16} />
+                            {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>

@@ -33,6 +33,9 @@ export default function EditBlogs() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [folderImages, setFolderImages] = useState<Array<{ url: string; publicId: string }>>([]);
   const [loadingImages, setLoadingImages] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  
+  const categories = ['Wedding', 'Pre-Wedding', 'Portrait', 'Event'];
 
   useEffect(() => {
     // Check authentication
@@ -364,16 +367,38 @@ export default function EditBlogs() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Category</label>
-                    <select
-                      value={editingBlog.category}
-                      onChange={(e) => setEditingBlog({ ...editingBlog, category: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors bg-white shadow-sm font-medium cursor-pointer hover:border-gray-400"
-                    >
-                      <option value="Wedding">Wedding</option>
-                      <option value="Pre-Wedding">Pre-Wedding</option>
-                      <option value="Portrait">Portrait</option>
-                      <option value="Event">Event</option>
-                    </select>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                        className="inline-flex items-center justify-between w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all whitespace-nowrap"
+                      >
+                        {editingBlog.category}
+                        <svg className="w-4 h-4 ms-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isCategoryOpen && (
+                        <div className="absolute z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg w-full">
+                          <ul className="p-2 text-sm text-gray-700 font-medium">
+                            {categories.map(cat => (
+                              <li key={cat}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingBlog({ ...editingBlog, category: cat });
+                                    setIsCategoryOpen(false);
+                                  }}
+                                  className="inline-flex items-center w-full p-2 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors text-left whitespace-nowrap"
+                                >
+                                  {cat}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -397,16 +422,6 @@ export default function EditBlogs() {
                       className="w-5 h-5 accent-black cursor-pointer"
                     />
                     <span className="text-sm">Show in Blogs</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editingBlog.addToRecentWorks}
-                      onChange={(e) => setEditingBlog({ ...editingBlog, addToRecentWorks: e.target.checked })}
-                      className="w-5 h-5 accent-black cursor-pointer"
-                    />
-                    <span className="text-sm">Add to Recent Works</span>
                   </label>
 
                   <label className="flex items-center gap-3 cursor-pointer">
