@@ -161,7 +161,7 @@ export default function Blogs() {
                   }}
                   className="bg-white rounded-lg overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-lg"
                 >
-                  <Link href={`/blogs/${post.id}`}>
+                  <Link href={`/blogs/${post.id}`} className="block relative">
                     <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
                       <Image
                         src={post.coverImage || post.image}
@@ -169,25 +169,24 @@ export default function Blogs() {
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    </div>
-                    
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white z-10">
-                      <span className="text-xs tracking-[0.3em] text-gray-200 mb-3 block font-medium">
-                        {post.category.toUpperCase()}
-                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                       
-                      <h3 className="font-dancing text-3xl md:text-4xl mb-3 leading-tight">
-                        {post.title}
-                      </h3>
-                      
-                      <p className="text-gray-200 text-sm mb-4 line-clamp-2 font-light leading-relaxed">
-                        {post.excerpt}
-                      </p>
+                      {/* Content Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                        <span className="text-xs tracking-[0.3em] text-gray-200 mb-2 block font-medium">
+                          {post.category.toUpperCase()}
+                        </span>
+                        
+                        <h3 className="font-dancing text-2xl md:text-3xl mb-2 leading-tight">
+                          {post.title}
+                        </h3>
+                        
+                        <p className="text-gray-200 text-sm mb-3 line-clamp-2 font-light leading-relaxed">
+                          {post.excerpt}
+                        </p>
 
-                      {/* Stats */}
-                      <div className="flex items-center gap-6 text-sm text-gray-300">
+                        {/* Stats */}
+                        <div className="flex items-center gap-4 text-xs text-gray-300">
                         <span className="flex items-center gap-2">
                           <Heart size={16} />
                           {post.likes || 0}
