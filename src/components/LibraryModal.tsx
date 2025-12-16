@@ -15,16 +15,13 @@ interface GalleryImage {
   title: string;
   date: string;
   folderName: string;
-}
-
-interface GalleryImageExtended extends GalleryImage {
   category?: string;
 }
 
 export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [galleryImages, setGalleryImages] = useState<GalleryImageExtended[]>([]);
-  const [filteredImages, setFilteredImages] = useState<GalleryImageExtended[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [filteredImages, setFilteredImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
