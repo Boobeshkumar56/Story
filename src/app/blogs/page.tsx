@@ -75,29 +75,64 @@ export default function Blogs() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20">
-      {/* Header */}
-      <section className="pt-12 pb-16 px-8 md:px-12 bg-white">
-        <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white pt-20">
+      {/* Header with elegant design */}
+      <section className="pt-20 pb-16 px-8 md:px-12 bg-white relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 opacity-60"></div>
+          <motion.div 
+            className="absolute inset-0 opacity-5"
+            animate={{
+              backgroundPosition: ['0% 0%', '100% 100%'],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: 'reverse',
+            }}
+            style={{
+              backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)',
+              backgroundSize: '50px 50px',
+            }}
+          />
+        </div>
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1, ease: 'easeOut' }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-extralight tracking-[0.2em] mb-6">
-              CAPTURED MOMENTS
-            </h1>
-            <p className="text-lg text-gray-600 font-light">
-              Explore our latest photography projects and client celebrations
-            </p>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="mb-8"
+            >
+              <h1 className="font-dancing text-5xl md:text-6xl mb-6 text-black">
+                Our Stories
+              </h1>
+              <motion.div 
+                className="w-32 h-px bg-black mx-auto"
+                initial={{ width: 0 }}
+                animate={{ width: 128 }}
+                transition={{ duration: 1, delay: 0.5 }}
+              ></motion.div>
+            </motion.div>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed tracking-wide"
+            >
+              Moments of love, laughter, and happily ever after captured forever
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
-      {/* Blog Grid - Uniform Grid System */}
-      {/* Blog Grid */}
-      <section className="pb-20 px-4 md:px-6">
+      {/* Blog Grid with masonry-style layout */}
+      <section className="pb-20 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-20">
@@ -110,79 +145,62 @@ export default function Blogs() {
               <p className="text-gray-500 mt-2">Upload your first event from the admin panel.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post, index) => {
               
               return (
                 <motion.article
                   key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  onMouseEnter={() => setHoveredId(post.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  className="aspect-[4/5] bg-gray-800 relative overflow-hidden cursor-pointer group"
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ 
+                    duration: 0.7, 
+                    delay: index * 0.15,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                  className="bg-white rounded-lg overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-lg"
                 >
                   <Link href={`/blogs/${post.id}`}>
-                    <Image
-                      src={post.coverImage || post.image}
-                      alt={post.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {/* Corner Borders on Hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      {/* Top Left Corner */}
-                      <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-white"></div>
-                      {/* Top Right Corner */}
-                      <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-white"></div>
-                      {/* Bottom Left Corner */}
-                      <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-white"></div>
-                      {/* Bottom Right Corner */}
-                      <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-white"></div>
+                    <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                      <Image
+                        src={post.coverImage || post.image}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     </div>
-
-                    {/* Overlay Content */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500" />
                     
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
-                      <span className="text-xs tracking-[0.2em] text-gray-300 mb-2 block">
+                    {/* Content Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white z-10">
+                      <span className="text-xs tracking-[0.3em] text-gray-200 mb-3 block font-medium">
                         {post.category.toUpperCase()}
                       </span>
                       
-                      <h3 className="font-light tracking-wide mb-2 text-lg md:text-xl">
+                      <h3 className="font-dancing text-3xl md:text-4xl mb-3 leading-tight">
                         {post.title}
                       </h3>
                       
-                      <p
-                        className={`text-gray-300 text-sm mb-3 transition-all duration-500 ${
-                          hoveredId === post.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                        }`}
-                      >
+                      <p className="text-gray-200 text-sm mb-4 line-clamp-2 font-light leading-relaxed">
                         {post.excerpt}
                       </p>
 
                       {/* Stats */}
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Heart size={12} />
+                      <div className="flex items-center gap-6 text-sm text-gray-300">
+                        <span className="flex items-center gap-2">
+                          <Heart size={16} />
                           {post.likes || 0}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Eye size={12} />
+                        <span className="flex items-center gap-2">
+                          <Eye size={16} />
                           {post.views || 0}
                         </span>
+                        <span className="flex items-center gap-2">
+                          <Calendar size={16} />
+                          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </span>
                       </div>
-                    </div>
-
-                    {/* Read More Indicator */}
-                    <div
-                      className={`absolute top-6 right-6 w-10 h-10 border-2 border-white rounded-full flex items-center justify-center text-white transition-all duration-500 ${
-                        hoveredId === post.id ? 'opacity-100 scale-100 rotate-90' : 'opacity-0 scale-0 rotate-0'
-                      }`}
-                    >
-                      →
                     </div>
                   </Link>
                 </motion.article>

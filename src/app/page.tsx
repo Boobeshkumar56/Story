@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 
 export default function Welcome() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,58 +79,46 @@ export default function Welcome() {
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30 z-10" />
 
-      {/* Content Overlay - Centered */}
-            {/* Content Overlay - Centered */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center px-6">
-        {/* Main Tagline - Now in cursive */}
-        <h2 className="font-dancing text-2xl md:text-3xl lg:text-4xl mb-8 leading-tight max-w-4xl">
-          Finding beauty in every moment,
-          <br />
-          connecting through the lens.
-        </h2>
+      {/* Content Overlay */}
+      <div className="absolute inset-0 z-20 flex flex-col text-white text-center px-6">
+        {/* Brand Title - At Top */}
+        <div className="pt-15 md:pt-35">
+          <h1 className="text-sm md:text-base font-bold flex items-center justify-center gap-2">
+            <span className="tracking-[0.3em]">STORIES</span>
+            <span className="font-dancing text-xl md:text-2xl">♡</span>
+            <span className="tracking-[0.3em]">BY MITHU ASHWIN</span>
+          </h1>
+        </div>
 
-        {/* Brand Title - Now below tagline */}
-        <h1 className="text-sm md:text-base mb-10 font-light flex items-center gap-2">
-          <span className="tracking-[0.3em]">STORIES</span>
-          <span className="font-dancing text-xl md:text-2xl">♡</span>
-          <span className="tracking-[0.3em]">BY MITHU ASHWIN</span>
-        </h1>
+        {/* Main Content - Centered */}
+        <div className="flex-1 flex flex-col items-center justify-center">
+          {/* Main Tagline - in cursive */}
+          <h2 className="font-dancing text-2xl md:text-3xl lg:text-4xl mb-8 leading-tight max-w-4xl">
+            Finding beauty in every moment,
+            <br />
+            connecting through the lens.
+          </h2>
 
-        {/* Welcome Button */}
-        <Link 
-          href="/home"
-          className="border-2 border-white text-white bg-transparent px-12 py-3 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300 font-light"
-        >
-          WELCOME
-        </Link>
-      </div>
+          {/* Welcome Button */}
+          <Link 
+            href="/home"
+            className="border-2 border-white text-white bg-transparent px-12 py-3 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300 font-light"
+          >
+            WELCOME
+          </Link>
+        </div>
 
-      {/* Social Media Icons - Bottom Center */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-6 z-20">
-        <a
-          href="https://instagram.com/mithuashwin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white hover:text-gray-300 transition-colors duration-300"
-        >
-          <Instagram size={20} />
-        </a>
-        <a
-          href="https://facebook.com/mithuashwin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white hover:text-gray-300 transition-colors duration-300"
-        >
-          <Facebook size={20} />
-        </a>
-        <a
-          href="https://twitter.com/mithuashwin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white hover:text-gray-300 transition-colors duration-300"
-        >
-          <Twitter size={20} />
-        </a>
+        {/* Social Media Icons - Bottom Center */}
+        <div className="pb-8">
+          <a
+            href="https://instagram.com/mithuashwin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-gray-300 transition-colors duration-300 inline-block"
+          >
+            <Instagram size={30} />
+          </a>
+        </div>
       </div>
         </div>
       </div>

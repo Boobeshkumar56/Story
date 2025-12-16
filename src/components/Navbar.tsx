@@ -75,7 +75,7 @@ export default function Navbar() {
 
           {/* Center Text - "by Mithu Ashwin" in cursive */}
           <div className="hidden md:flex justify-center w-1/3">
-            <span className="font-dancing text-xl text-black">by Mithu Ashwin</span>
+            <span className="font-dancing text-xl text-black" style={{ fontWeight: 700 }}>by Mithu Ashwin</span>
           </div>
 
           {/* Desktop Navigation - Right */}

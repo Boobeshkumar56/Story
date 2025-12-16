@@ -1,16 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Save, Lock, Upload, X, Heart, Eye, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
+import AdminNav from '@/components/AdminNav';
 
 export default function AdminBlogs() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [uploadError, setUploadError] = useState<string>('');
+
+  useEffect(() => {
+    // Check if already authenticated
+    const authStatus = localStorage.getItem('adminAuth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     folderName: '',
@@ -23,7 +34,6 @@ export default function AdminBlogs() {
     eventDate: '',
     coverImage: '',
     galleryImages: [] as string[],
-    addToRecentWorks: true,
     addToLibrary: true,
     addToBlogs: true,
   });
@@ -35,9 +45,16 @@ export default function AdminBlogs() {
     // Simple password protection - in production, use proper authentication
     if (password === 'admin123') {
       setIsAuthenticated(true);
+      localStorage.setItem('adminAuth', 'true');
     } else {
       alert('Invalid password');
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('adminAuth');
+    router.push('/home');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -117,7 +134,6 @@ export default function AdminBlogs() {
           location: formData.location,
           eventDate: formData.eventDate,
           coverImage: formData.coverImage,
-          addToRecentWorks: formData.addToRecentWorks,
           addToLibrary: formData.addToLibrary,
           addToBlogs: formData.addToBlogs
         })
@@ -150,7 +166,6 @@ export default function AdminBlogs() {
         eventDate: '',
         coverImage: '',
         galleryImages: [],
-        addToRecentWorks: true,
         addToLibrary: true,
         addToBlogs: true,
       });
@@ -220,35 +235,11 @@ export default function AdminBlogs() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-20">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-light mb-2">Content Management</h1>
-              <p className="text-gray-600">Upload events to Blogs, Library & Recent Works</p>
-            </div>
-            <div className="flex gap-4">
-              <Link
-                href="/blogs"
-                className="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              >
-                View Blogs
-              </Link>
-              <button
-                onClick={() => setIsAuthenticated(false)}
-                className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <AdminNav onLogout={handleLogout} />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-8 py-12 pt-32">
         {!showForm ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -380,7 +371,7 @@ export default function AdminBlogs() {
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-black transition-colors"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors bg-white shadow-sm font-medium cursor-pointer hover:border-gray-400"
                       required
                     >
                       {categories.map(cat => (
@@ -544,19 +535,6 @@ export default function AdminBlogs() {
                     <div className="flex-1">
                       <div className="font-medium">Blogs Page</div>
                       <div className="text-sm text-gray-500">Show as a blog post with full details</div>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={formData.addToRecentWorks}
-                      onChange={() => handleCheckboxChange('addToRecentWorks')}
-                      className="w-5 h-5 accent-black cursor-pointer"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">Recent Works</div>
-                      <div className="text-sm text-gray-500">Add to recent works section (will appear first)</div>
                     </div>
                   </label>
 

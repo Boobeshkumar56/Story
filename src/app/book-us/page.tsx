@@ -82,7 +82,7 @@ export default function BookUs() {
       </section>
 
       {/* Services */}
-      <section className="py-20 px-8 md:px-12 bg-black text-white">
+      <section className="py-20 px-8 md:px-12 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -91,13 +91,13 @@ export default function BookUs() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-extralight tracking-[0.15em] mb-6">
+            <h2 className="text-4xl md:text-5xl font-light tracking-[0.15em] mb-6 text-black">
               WHAT I OFFER
             </h2>
-            <div className="w-24 h-px bg-white mx-auto opacity-50"></div>
+            <div className="w-24 h-px bg-gray-400 mx-auto"></div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {services.map((service, index) => (
               <motion.div
                 key={service.title}
@@ -105,20 +105,20 @@ export default function BookUs() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="group relative overflow-hidden bg-gray-900 hover:bg-gray-800 transition-all duration-500 p-12"
+                className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-400 transition-all duration-500 p-12"
               >
                 {/* Number */}
-                <div className="absolute top-8 right-8 text-6xl font-extralight text-gray-700 opacity-50 group-hover:opacity-70 transition-opacity">
+                <div className="absolute top-8 right-8 text-6xl font-light text-gray-200 group-hover:text-gray-300 transition-colors">
                   0{index + 1}
                 </div>
 
                 {/* Content */}
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-light tracking-[0.15em] mb-6 border-b border-gray-700 pb-4">
+                  <h3 className="text-2xl font-light tracking-[0.15em] mb-6 border-b border-gray-200 pb-4 text-black">
                     {service.title.toUpperCase()}
                   </h3>
                   
-                  <p className="text-gray-400 mb-8 leading-relaxed font-light">
+                  <p className="text-gray-600 mb-8 leading-relaxed font-light">
                     {service.description}
                   </p>
 
@@ -127,9 +127,9 @@ export default function BookUs() {
                     {service.features.map((feature, featureIndex) => (
                       <li
                         key={featureIndex}
-                        className="flex items-start gap-3 text-sm text-gray-300"
+                        className="flex items-start gap-3 text-sm text-gray-700"
                       >
-                        <span className="text-white mt-1">→</span>
+                        <span className="text-black mt-1">→</span>
                         <span className="tracking-wide">{feature}</span>
                       </li>
                     ))}
@@ -137,7 +137,7 @@ export default function BookUs() {
                 </div>
 
                 {/* Hover Effect Line */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
               </motion.div>
             ))}
           </div>
@@ -148,14 +148,14 @@ export default function BookUs() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mt-16 pt-16 border-t border-gray-800"
+            className="text-center mt-16 pt-16 border-t border-gray-200"
           >
-            <p className="text-gray-400 text-lg mb-6 font-light">
+            <p className="text-gray-600 text-lg mb-6 font-light">
               Each package can be customized to fit your unique needs
             </p>
             <Link
               href="#contact"
-              className="inline-block border border-white text-white px-12 py-4 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300"
+              className="inline-block border border-black text-black px-12 py-4 text-sm tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300"
             >
               LET&apos;S DISCUSS
             </Link>
@@ -300,7 +300,7 @@ export default function BookUs() {
                       name="eventType"
                       value={formData.eventType}
                       onChange={handleInputChange}
-                      className="w-full px-0 py-3 border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors bg-transparent text-lg"
+                      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-600 transition-colors bg-transparent text-lg font-medium cursor-pointer hover:border-gray-600"
                       required
                     >
                       <option value="">Event Type</option>

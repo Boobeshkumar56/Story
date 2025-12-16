@@ -153,7 +153,7 @@ export default function RecentWorks() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white text-black">
       {/* Header */}
       <section className="py-20 px-6 border-b border-gray-800">
         <div className="max-w-7xl mx-auto">
