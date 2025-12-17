@@ -477,18 +477,16 @@ function GalleryScene({
 				const texture = textures[plane.imageIndex];
 				const material = materials[i];
 
-				if (!texture || !material) return null;
+			if (!texture || !material) return null;
 
-				const worldZ = plane.z - depthRange / 2;
+			const worldZ = plane.z - depthRange / 2;
 
-				// Calculate scale to maintain aspect ratio
-				const aspect = texture.image
-					? texture.image.width / texture.image.height
-					: 1;
-				const scale: [number, number, number] =
-					aspect > 1 ? [2 * aspect, 2, 1] : [2, 2 / aspect, 1];
-
-				return (
+			// Calculate scale to maintain aspect ratio
+			const aspect = texture.image && typeof texture.image === 'object' && 'width' in texture.image && 'height' in texture.image
+				? (texture.image.width as number) / (texture.image.height as number)
+				: 1;
+			const scale: [number, number, number] =
+				aspect > 1 ? [2 * aspect, 2, 1] : [2, 2 / aspect, 1];				return (
 					<ImagePlane
 						key={plane.index}
 						texture={texture}
