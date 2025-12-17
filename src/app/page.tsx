@@ -111,7 +111,7 @@ export default function Welcome() {
         {/* Social Media Icons - Bottom Center */}
         <div className="pb-8">
           <a
-            href="https://instagram.com/mithuashwin"
+            href="https://www.instagram.com/one_way_art_studio?igsh=aGR1b3lsNTNjc3Ay"
             target="_blank"
             rel="noopener noreferrer"
             className="text-white hover:text-gray-300 transition-colors duration-300 inline-block"
