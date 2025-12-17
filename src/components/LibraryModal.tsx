@@ -1,9 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const InfiniteGallery = dynamic(() => import('./InfiniteGallery'), {
+  ssr: false,
+  loading: () => <div className="w-full h-full flex items-center justify-center">Loading gallery...</div>
+});
+
+// Key to force remount of gallery when modal opens/closes
+let galleryKey = 0;
 
 interface LibraryModalProps {
   isOpen: boolean;
@@ -19,15 +27,23 @@ interface GalleryImage {
 }
 
 export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [filteredImages, setFilteredImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [currentGalleryKey, setCurrentGalleryKey] = useState(0);
   
   const categories = ['All', 'Wedding', 'Pre-Wedding', 'Portrait', 'Event', 'Birthday'];
+
+  // Increment gallery key when modal opens to force fresh WebGL context
+  useEffect(() => {
+    if (isOpen) {
+      galleryKey++;
+      setCurrentGalleryKey(galleryKey);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return; // Only fetch when modal is opened
@@ -256,140 +272,44 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
               </div>
             </div>
 
-            {/* Header */}
-            <section className="pt-16 pb-12 px-8 md:px-12">
-              <div className="max-w-7xl mx-auto">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
+            {/* 3D Gallery Section */}
+            <section className="h-[calc(100vh-140px)] w-full bg-white">
+              {loading ? (
+                <div className="flex justify-center items-center h-full">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full"
+                  />
+                </div>
+              ) : filteredImages.length === 0 ? (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1 }}
-                  className="text-center mb-12"
+                  className="flex flex-col items-center justify-center h-full"
                 >
-                  <p className="text-lg tracking-[0.2em] text-gray-600 mb-8">
-                    A CURATED COLLECTION OF FINEST WORK
-                  </p>
-                  <div className="w-24 h-px bg-black mx-auto"></div>
+                  <p className="text-gray-600 tracking-[0.2em] text-lg mb-2">NO IMAGES FOUND</p>
+                  <p className="text-sm text-gray-400">Try adjusting your search or filter</p>
                 </motion.div>
-              </div>
-            </section>
-
-            {/* Gallery Grid */}
-            <section className="pb-20 px-8 md:px-12">
-              <div className="max-w-7xl mx-auto">
-                {loading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full"
-                    />
-                  </div>
-                ) : filteredImages.length === 0 ? (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center py-20"
-                  >
-                    <p className="text-gray-600 tracking-[0.2em] text-lg mb-2">NO IMAGES FOUND</p>
-                    <p className="text-sm text-gray-400">Try adjusting your search or filter</p>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    layout
-                    className="columns-1 sm:columns-2 gap-6"
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {filteredImages.map((image, index) => (
-                        <motion.div
-                          key={`${image.folderName}-${index}`}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                          transition={{ 
-                            duration: 0.5, 
-                            delay: index * 0.05,
-                            layout: { duration: 0.3 }
-                          }}
-                          whileHover={{ scale: 1.02, y: -4 }}
-                          className="group cursor-pointer mb-6 break-inside-avoid rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-500"
-                          onClick={() => setSelectedImage(image.src)}
-                        >
-                          <div className="relative overflow-hidden bg-gray-100">
-                            <Image
-                              src={image.src}
-                              alt={image.title}
-                              width={400}
-                              height={600}
-                              className="w-full h-auto object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
-                            />
-                            <motion.div 
-                              className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
-                              initial={{ opacity: 0 }}
-                              whileHover={{ opacity: 1 }}
-                              transition={{ duration: 0.3 }}
-                            />
-                            <motion.div 
-                              className="absolute inset-0 flex flex-col justify-end p-6"
-                              initial={{ opacity: 0, y: 20 }}
-                              whileHover={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <div className="text-white">
-                                <h3 className="font-allura text-2xl mb-1">{image.title}</h3>
-                                <div className="flex items-center gap-3 text-xs">
-                                  {image.category && (
-                                    <span className="px-2 py-1 bg-white/20 rounded tracking-wide">{image.category}</span>
-                                  )}
-                                  <span className="tracking-[0.2em] opacity-80">{image.date}</span>
-                                </div>
-                              </div>
-                            </motion.div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
-                )}
-              </div>
-            </section>
-
-            {/* Lightbox for enlarged images */}
-            <AnimatePresence>
-              {selectedImage && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-8"
-                  onClick={() => setSelectedImage(null)}
-                >
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative max-w-5xl max-h-[90vh]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Image
-                      src={selectedImage}
-                      alt="Full size image"
-                      width={1200}
-                      height={800}
-                      className="w-full h-full object-contain"
-                    />
-                    <button
-                      onClick={() => setSelectedImage(null)}
-                      className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors text-sm tracking-[0.2em] flex items-center gap-2"
-                    >
-                      <X size={16} />
-                      CLOSE
-                    </button>
-                  </motion.div>
-                </motion.div>
+              ) : (
+                <InfiniteGallery 
+                  key={currentGalleryKey}
+                  images={filteredImages.map(img => img.src)}
+                  className="w-full h-full"
+                  speed={1}
+                  visibleCount={Math.min(filteredImages.length, 12)}
+                  fadeSettings={{
+                    fadeIn: { start: 0.05, end: 0.25 },
+                    fadeOut: { start: 0.4, end: 0.43 }
+                  }}
+                  blurSettings={{
+                    blurIn: { start: 0.0, end: 0.1 },
+                    blurOut: { start: 0.4, end: 0.43 },
+                    maxBlur: 8.0
+                  }}
+                />
               )}
-            </AnimatePresence>
+            </section>
           </div>
         </motion.div>
       )}
