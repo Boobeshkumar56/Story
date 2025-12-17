@@ -510,9 +510,9 @@ export default function AdminBlogs() {
 
                 {/* Display uploaded gallery images */}
                 {formData.galleryImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
                     {formData.galleryImages.map((image, index) => (
-                      <div key={index} className="relative group">
+                      <div key={`${image}-${index}`} className="relative group">
                         <img
                           src={image}
                           alt={`Gallery image ${index + 1}`}

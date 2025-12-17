@@ -133,3 +133,13 @@ html.hide-all-scrollbars::-webkit-scrollbar {
     repeating-linear-gradient(90deg, transparent, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px),
     repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.7) 24px, rgba(255,255,255,0.7) 26px);
 }
+
+/* Shimmer animation for upload progress bar */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

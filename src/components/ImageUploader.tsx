@@ -20,6 +20,8 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadImage, isUploading, progress } = useImageUpload();
+  const [currentFile, setCurrentFile] = React.useState(0);
+  const [totalFiles, setTotalFiles] = React.useState(0);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -33,8 +35,11 @@ export default function ImageUploader({
     const filesToUpload = Array.from(files).slice(0, maxFiles);
 
     if (multiple) {
+      setTotalFiles(filesToUpload.length);
       // Upload multiple files sequentially
-      for (const file of filesToUpload) {
+      for (let i = 0; i < filesToUpload.length; i++) {
+        setCurrentFile(i + 1);
+        const file = filesToUpload[i];
         const result = await uploadImage(file, folder);
         if (result.success && result.url) {
           onUploadComplete(result.url);
@@ -42,10 +47,12 @@ export default function ImageUploader({
           onError(result.error);
         }
       }
-      // Reset input
+      // Reset input and counters
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      setCurrentFile(0);
+      setTotalFiles(0);
     } else {
       // Single file upload
       const result = await uploadImage(filesToUpload[0], folder);
@@ -78,12 +85,22 @@ export default function ImageUploader({
       />
       
       {isUploading && (
-        <div className="mt-2">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="mt-3">
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div
-              className="bg-black h-2 rounded-full transition-all duration-300"
+              className="bg-black h-3 rounded-full transition-all duration-300 relative"
               style={{ width: `${progress}%` }}
-            />
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-xs text-gray-600 font-medium">{Math.round(progress)}%</p>
+            {multiple && totalFiles > 1 && (
+              <p className="text-xs text-gray-600 font-medium">
+                Image {currentFile} of {totalFiles}
+              </p>
+            )}
           </div>
         </div>
       )}

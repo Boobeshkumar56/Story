@@ -42,6 +42,12 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
     if (isOpen) {
       galleryKey++;
       setCurrentGalleryKey(galleryKey);
+    } else {
+      // Reset states when modal closes to free memory
+      setGalleryImages([]);
+      setFilteredImages([]);
+      setSearchQuery('');
+      setSelectedCategory('All');
     }
   }, [isOpen]);
 
@@ -297,7 +303,7 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
                   images={filteredImages.map(img => img.src)}
                   className="w-full h-full"
                   speed={1}
-                  visibleCount={Math.min(filteredImages.length, 12)}
+                  visibleCount={Math.min(filteredImages.length, 8)}
                   fadeSettings={{
                     fadeIn: { start: 0.05, end: 0.25 },
                     fadeOut: { start: 0.4, end: 0.43 }

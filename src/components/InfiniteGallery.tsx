@@ -67,6 +67,7 @@ interface PlaneData {
 const DEFAULT_DEPTH_RANGE = 50;
 const MAX_HORIZONTAL_OFFSET = 8;
 const MAX_VERTICAL_OFFSET = 8;
+const IMAGE_SCALE_MULTIPLIER = 1.8;
 
 // Custom shader material for blur, opacity, and cloth folding effects
 const createClothMaterial = () => {
@@ -199,7 +200,7 @@ function ImagePlane({
 			onPointerEnter={() => setIsHovered(true)}
 			onPointerLeave={() => setIsHovered(false)}
 		>
-			<planeGeometry args={[1, 1, 32, 32]} />
+			<planeGeometry args={[1, 1, 16, 16]} />
 		</mesh>
 	);
 }
@@ -239,6 +240,15 @@ function GalleryScene({
 		() => Array.from({ length: visibleCount }, () => createClothMaterial()),
 		[visibleCount]
 	);
+
+	// Cleanup materials on unmount
+	useEffect(() => {
+		return () => {
+			materials.forEach(material => {
+				material.dispose();
+			});
+		};
+	}, [materials]);
 
 	const spatialPositions = useMemo(() => {
 		const positions: { x: number; y: number }[] = [];
@@ -486,7 +496,7 @@ function GalleryScene({
 				? (texture.image.width as number) / (texture.image.height as number)
 				: 1;
 			const scale: [number, number, number] =
-				aspect > 1 ? [2 * aspect, 2, 1] : [2, 2 / aspect, 1];				return (
+				aspect > 1 ? [2 * aspect * IMAGE_SCALE_MULTIPLIER, 2 * IMAGE_SCALE_MULTIPLIER, 1] : [2 * IMAGE_SCALE_MULTIPLIER, 2 / aspect * IMAGE_SCALE_MULTIPLIER, 1];				return (
 					<ImagePlane
 						key={plane.index}
 						texture={texture}
@@ -544,6 +554,7 @@ export default function InfiniteGallery({
 	},
 }: InfiniteGalleryProps) {
 	const [webglSupported, setWebglSupported] = useState(true);
+	const [contextLost, setContextLost] = useState(false);
 
 	useEffect(() => {
 		// Check WebGL support
@@ -554,6 +565,7 @@ export default function InfiniteGallery({
 			if (!gl) {
 				setWebglSupported(false);
 			}
+			canvas.remove();
 		} catch (e) {
 			setWebglSupported(false);
 		}
@@ -567,6 +579,21 @@ export default function InfiniteGallery({
 		);
 	}
 
+	if (contextLost) {
+		return (
+			<div className={className} style={style}>
+				<div className="flex items-center justify-center h-full">
+					<button
+						onClick={() => setContextLost(false)}
+						className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800"
+					>
+						Reload Gallery
+					</button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className={className} style={style}>
 			<Canvas
@@ -576,11 +603,26 @@ export default function InfiniteGallery({
 					alpha: true,
 					preserveDrawingBuffer: false,
 					powerPreference: 'high-performance',
-					failIfMajorPerformanceCaveat: false
+					failIfMajorPerformanceCaveat: false,
+					depth: true,
+					stencil: false
 				}}
 				dpr={[1, 2]}
 				onCreated={({ gl }) => {
 					gl.setClearColor('#ffffff', 1);
+					
+					// Add context loss handlers
+					const canvas = gl.domElement;
+					canvas.addEventListener('webglcontextlost', (event) => {
+						event.preventDefault();
+						console.warn('WebGL context lost');
+						setContextLost(true);
+					}, false);
+					
+					canvas.addEventListener('webglcontextrestored', () => {
+						console.log('WebGL context restored');
+						setContextLost(false);
+					}, false);
 				}}
 			>
 				<GalleryScene
