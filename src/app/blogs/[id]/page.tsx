@@ -1,11 +1,11 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Calendar, Heart, Eye, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Heart, Eye, ArrowLeft, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function BlogPost() {
   const params = useParams();
@@ -16,6 +16,29 @@ export default function BlogPost() {
   const [eventData, setEventData] = useState<any>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const openLightbox = (index: number) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
+
+  const prevImage = useCallback(() => {
+    setLightboxIndex(prev => (prev !== null ? (prev - 1 + galleryImages.length) % galleryImages.length : null));
+  }, [galleryImages.length]);
+
+  const nextImage = useCallback(() => {
+    setLightboxIndex(prev => (prev !== null ? (prev + 1) % galleryImages.length : null));
+  }, [galleryImages.length]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prevImage();
+      else if (e.key === 'ArrowRight') nextImage();
+      else if (e.key === 'Escape') closeLightbox();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIndex, prevImage, nextImage]);
 
   useEffect(() => {
     loadEventData();
@@ -150,7 +173,7 @@ export default function BlogPost() {
           {galleryImages.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
               {galleryImages.map((image: string, index: number) => (
-                <motion.div key={index} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: index * 0.1 }} viewport={{ once: true }} className="relative h-80 overflow-hidden group cursor-pointer">
+                <motion.div key={index} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: index * 0.1 }} viewport={{ once: true }} className="relative h-80 overflow-hidden group cursor-pointer" onClick={() => openLightbox(index)}>
                   <Image src={image} alt={`Gallery image ${index + 1}`} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
                 </motion.div>
@@ -161,6 +184,74 @@ export default function BlogPost() {
           )}
         </div>
       </section>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            key="lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            onClick={closeLightbox}
+          >
+            {/* Modal box */}
+            <motion.div
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 16 }}
+              transition={{ duration: 0.25 }}
+              className="relative rounded-2xl overflow-hidden shadow-2xl w-full max-w-4xl"
+              style={{ maxHeight: '88vh', aspectRatio: '16/10' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Image */}
+              <Image
+                src={galleryImages[lightboxIndex]}
+                alt={`Gallery image ${lightboxIndex + 1}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 896px) 100vw, 896px"
+              />
+
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-3 right-3 bg-black/40 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors z-10"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Counter */}
+              <span className="absolute top-3 left-3 bg-black/40 text-white/80 text-xs tracking-widest px-2.5 py-1 rounded-full">
+                {lightboxIndex + 1} / {galleryImages.length}
+              </span>
+
+              {/* Prev */}
+              <button
+                onClick={prevImage}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={22} />
+              </button>
+
+              {/* Next */}
+              <button
+                onClick={nextImage}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="text-center py-16">
         <Link href="/blogs" className="inline-block border border-black px-12 py-4 text-sm tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300">
