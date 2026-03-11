@@ -90,32 +90,12 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // The file is uploaded as raw type, so we need to fetch it directly by URL
-      // First, try to get the resource info to get the secure URL
-      const publicId = `${folderName}/metadata.json`;
-      
-      // Try different approaches to fetch the metadata
-      let metadataUrl;
-      
-      try {
-        // Attempt 1: Try as raw resource with .json extension
-        const result = await cloudinary.api.resource(publicId, {
-          resource_type: 'raw',
-          type: 'upload'
-        });
-        metadataUrl = result.secure_url;
-        console.log('Metadata resource found via API:', metadataUrl);
-      } catch (rawError) {
-        console.log('API lookup failed, constructing URL directly');
-        // Attempt 2: Construct URL directly using Cloudinary cloud name
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-        metadataUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/${folderName}/metadata.json`;
-      }
-
-      console.log('Attempting to fetch metadata from:', metadataUrl);
+      // Construct URL directly — no API lookup round-trip needed
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const metadataUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/${folderName}/metadata.json`;
 
       // Fetch the actual JSON content from the URL
-      const response = await fetch(metadataUrl);
+      const response = await fetch(metadataUrl, { next: { revalidate: 60 } });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch metadata file: ${response.statusText}`);
@@ -123,10 +103,10 @@ export async function GET(request: NextRequest) {
       
       const metadata = await response.json();
 
-      return NextResponse.json({
-        success: true,
-        metadata
-      });
+      return NextResponse.json(
+        { success: true, metadata },
+        { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+      );
     } catch (fetchError: any) {
       console.error('Error fetching metadata from Cloudinary:', fetchError);
       

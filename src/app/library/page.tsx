@@ -31,61 +31,53 @@ export default function Library() {
     const fetchLibraryImages = async () => {
       try {
         setLoading(true);
-        
-        // Get all event folders from Cloudinary (works on all devices)
-        const foldersRes = await fetch('/api/folders');
-        const foldersData = await foldersRes.json();
-        const folders: string[] = foldersData.success ? foldersData.folders : [];
-        
-        if (folders.length === 0) {
-          // No folders, show empty state
+
+        // Single batch call — replaces N+1 pattern
+        const summaryRes = await fetch('/api/event-summaries');
+        const summaryData = await summaryRes.json();
+
+        if (!summaryData.success) {
           setGalleryImages([]);
-          setLoading(false);
           return;
         }
-        
-        // Fetch metadata and images for each folder
+
+        const libraryFolders = summaryData.events.filter((e: any) => e.metadata.addToLibrary);
+
+        if (libraryFolders.length === 0) {
+          setGalleryImages([]);
+          return;
+        }
+
         const allImages: GalleryImage[] = [];
-        
+
         await Promise.all(
-          folders.map(async (folderName: string) => {
+          libraryFolders.map(async (e: any) => {
             try {
-              const metadataRes = await fetch(`/api/metadata?folder=${encodeURIComponent(folderName)}`);
-              if (!metadataRes.ok) return;
-              
-              const metadata: EventMetadata = await metadataRes.json();
-              
-              // Only include if addToLibrary is true
-              if (!metadata.addToLibrary) return;
-              
-              // Fetch all images from the folder
-              const imagesRes = await fetch(`/api/folder-images?folder=${encodeURIComponent(folderName)}`);
+              const imagesRes = await fetch(`/api/folder-images?folder=${encodeURIComponent(e.folderName)}`);
               if (!imagesRes.ok) return;
-              
               const imagesData = await imagesRes.json();
-              
-              // Add all images from this folder to the gallery (only real Cloudinary images)
-              if (imagesData.images && imagesData.images.length > 0) {
-                imagesData.images.forEach((imageUrl: string) => {
-                  allImages.push({
-                    src: imageUrl,
-                    title: metadata.title,
-                    date: metadata.date,
-                    folderName: folderName
+              if (imagesData.success && imagesData.images.length > 0) {
+                imagesData.images
+                  .filter((img: any) => !img.publicId.includes('metadata'))
+                  .forEach((img: any) => {
+                    allImages.push({
+                      src: img.url,
+                      title: e.metadata.title,
+                      date: e.metadata.date,
+                      folderName: e.folderName,
+                    });
                   });
-                });
               }
             } catch (error) {
-              console.error(`Error fetching library images for ${folderName}:`, error);
+              console.error(`Error fetching library images for ${e.folderName}:`, error);
             }
           })
         );
-        
-        // Only set real Cloudinary images, no mock data
+
         setGalleryImages(allImages);
       } catch (error) {
         console.error('Error fetching library images:', error);
-        setGalleryImages([]); // Show empty state on error
+        setGalleryImages([]);
       } finally {
         setLoading(false);
       }

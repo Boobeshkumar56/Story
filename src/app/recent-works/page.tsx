@@ -88,61 +88,53 @@ export default function RecentWorks() {
     const fetchRecentWorks = async () => {
       try {
         setLoading(true);
-        
-        // Get all event folders from Cloudinary (works on all devices)
-        const foldersRes = await fetch('/api/folders');
-        const foldersData = await foldersRes.json();
-        const folders: string[] = foldersData.success ? foldersData.folders : [];
-        
-        if (folders.length === 0) {
-          // No Cloudinary data, use mock data
+
+        // Single batch call — replaces N+1 pattern
+        const summaryRes = await fetch('/api/event-summaries');
+        const summaryData = await summaryRes.json();
+
+        if (!summaryData.success || summaryData.events.length === 0) {
           setRecentProjects(mockProjects);
-          setLoading(false);
           return;
         }
-        
-        // Fetch metadata for each folder
+
+        const recentFolders = summaryData.events.filter((e: any) => e.metadata.addToRecentWorks);
+
+        if (recentFolders.length === 0) {
+          setRecentProjects(mockProjects);
+          return;
+        }
+
+        // Fetch all images for each applicable folder in parallel
         const projectsData = await Promise.all(
-          folders.map(async (folderName: string) => {
+          recentFolders.map(async (e: any) => {
             try {
-              const metadataRes = await fetch(`/api/metadata?folder=${encodeURIComponent(folderName)}`);
-              if (!metadataRes.ok) return null;
-              
-              const metadata: EventMetadata = await metadataRes.json();
-              
-              // Only include if addToRecentWorks is true
-              if (!metadata.addToRecentWorks) return null;
-              
-              // Fetch all images from the folder for the modal
-              const imagesRes = await fetch(`/api/folder-images?folder=${encodeURIComponent(folderName)}`);
+              const imagesRes = await fetch(`/api/folder-images?folder=${encodeURIComponent(e.folderName)}`);
               if (!imagesRes.ok) return null;
-              
               const imagesData = await imagesRes.json();
-              
+              const images: string[] = imagesData.success
+                ? imagesData.images
+                    .filter((img: any) => !img.publicId.includes('metadata'))
+                    .map((img: any) => img.url)
+                : [];
+
               return {
-                id: folderName,
-                title: metadata.title,
-                date: metadata.date,
-                description: metadata.description,
-                coverImage: metadata.coverImageUrl, // Only cover image shown in grid
-                images: imagesData.images || []
+                id: e.folderName,
+                title: e.metadata.title,
+                date: e.metadata.date,
+                description: e.metadata.description,
+                coverImage: e.coverImage || images[0] || '',
+                images,
               };
             } catch (error) {
-              console.error(`Error fetching project ${folderName}:`, error);
+              console.error(`Error fetching project ${e.folderName}:`, error);
               return null;
             }
           })
         );
-        
-        // Filter out null values
+
         const validProjects = projectsData.filter((p): p is RecentProject => p !== null);
-        
-        // If no valid Cloudinary projects, use mock data
-        if (validProjects.length === 0) {
-          setRecentProjects(mockProjects);
-        } else {
-          setRecentProjects(validProjects);
-        }
+        setRecentProjects(validProjects.length > 0 ? validProjects : mockProjects);
       } catch (error) {
         console.error('Error fetching recent works:', error);
         setRecentProjects(mockProjects); // Fallback to mock on error

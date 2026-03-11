@@ -68,8 +68,10 @@ export default function Welcome() {
                     alt={`Portfolio image ${(index % carouselImages.length) + 1}`}
                     fill
                     className="object-cover"
-                    priority={index < 2}
-                    quality={90}
+                    priority={index === 0}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    quality={75}
+                    sizes="100vw"
                   />
                 </div>
               ))}

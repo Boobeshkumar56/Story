@@ -18,13 +18,11 @@ export default function Blogs() {
   const loadBlogs = async () => {
     try {
       setLoading(true);
-      
-      // Get list of folders from Cloudinary (works on all devices)
-      const foldersRes = await fetch('/api/folders');
-      const foldersData = await foldersRes.json();
-      const eventFolders: string[] = foldersData.success ? foldersData.folders : [];
-      
-      if (eventFolders.length === 0) {
+
+      const res = await fetch('/api/event-summaries');
+      const data = await res.json();
+
+      if (!data.success || data.events.length === 0) {
         // Show demo data if no events exist
         setBlogPosts([
           {
@@ -39,54 +37,35 @@ export default function Blogs() {
             views: 0
           }
         ]);
-        setLoading(false);
         return;
       }
 
-      // Fetch metadata for each folder
-      const blogsData = await Promise.all(
-        eventFolders.map(async (folderName: string) => {
-          try {
-            const response = await fetch(`/api/metadata?folder=${folderName}`);
-            const result = await response.json();
-            
-            if (result.success && result.metadata.addToBlogs) {
-              let coverImage = result.metadata.coverImage;
+      const blogs = data.events
+        .filter((e: any) => e.metadata.addToBlogs)
+        .map((e: any) => ({
+          id: e.folderName,
+          folderName: e.folderName,
+          ...e.metadata,
+          coverImage: e.coverImage || e.metadata.coverImage,
+        }));
 
-              // If no cover image set, use the first image from the folder
-              if (!coverImage) {
-                try {
-                  const imagesRes = await fetch(`/api/folder-images?folder=${folderName}`);
-                  const imagesData = await imagesRes.json();
-                  if (imagesData.success && imagesData.images.length > 0) {
-                    const validImages = imagesData.images.filter((img: any) => !img.publicId.includes('metadata'));
-                    if (validImages.length > 0) {
-                      coverImage = validImages[0].url;
-                    }
-                  }
-                } catch {
-                  // ignore, coverImage stays undefined
-                }
-              }
-
-              return {
-                id: folderName,
-                folderName: folderName,
-                ...result.metadata,
-                coverImage
-              };
-            }
-            return null;
-          } catch (error) {
-            console.error(`Error loading folder ${folderName}:`, error);
-            return null;
+      if (blogs.length === 0) {
+        setBlogPosts([
+          {
+            id: '1',
+            folderName: 'demo-wedding',
+            title: 'Demo Wedding Event',
+            excerpt: 'Upload your first event from the admin panel',
+            coverImage: 'https://picsum.photos/800/600?random=101',
+            category: 'Wedding',
+            date: '2024-01-15',
+            likes: 0,
+            views: 0
           }
-        })
-      );
-
-      // Filter out null values and set blogs
-      const validBlogs = blogsData.filter(blog => blog !== null);
-      setBlogPosts(validBlogs);
+        ]);
+      } else {
+        setBlogPosts(blogs);
+      }
     } catch (error) {
       console.error('Error loading blogs:', error);
       setBlogPosts([]);

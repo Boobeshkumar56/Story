@@ -27,44 +27,19 @@ export default function Home() {
   useEffect(() => {
     const loadCarouselImages = async () => {
       try {
-        const foldersRes = await fetch('/api/folders');
-        const foldersData = await foldersRes.json();
-        const eventFolders: string[] = foldersData.success ? foldersData.folders : [];
-        if (eventFolders.length === 0) return;
+        const res = await fetch('/api/event-summaries');
+        const data = await res.json();
+        if (!data.success || data.events.length === 0) return;
 
-        const entries = await Promise.all(
-          eventFolders.map(async (folderName: string) => {
-            try {
-              const metaRes = await fetch(`/api/metadata?folder=${folderName}`);
-              const metaData = await metaRes.json();
-              if (!metaData.success) return null;
-              const meta = metaData.metadata;
+        const entries: RecentWork[] = data.events
+          .filter((e: any) => e.coverImage)
+          .map((e: any) => ({
+            src: e.coverImage,
+            title: (e.metadata.title || e.folderName).toUpperCase(),
+            location: e.metadata.location || e.metadata.excerpt || 'A beautiful story captured forever',
+          }));
 
-              let coverImage = meta.coverImage;
-              if (!coverImage) {
-                const imagesRes = await fetch(`/api/folder-images?folder=${folderName}`);
-                const imagesData = await imagesRes.json();
-                if (imagesData.success && imagesData.images.length > 0) {
-                  const valid = imagesData.images.filter((img: any) => !img.publicId.includes('metadata'));
-                  if (valid.length > 0) coverImage = valid[0].url;
-                }
-              }
-
-              if (!coverImage) return null;
-
-              return {
-                src: coverImage,
-                title: (meta.title || folderName).toUpperCase(),
-                location: meta.location || meta.excerpt || 'A beautiful story captured forever',
-              } as RecentWork;
-            } catch {
-              return null;
-            }
-          })
-        );
-
-        const valid = entries.filter((e): e is RecentWork => e !== null);
-        if (valid.length > 0) setCarouselImages(valid);
+        if (entries.length > 0) setCarouselImages(entries);
       } catch {
         // keep default static images
       }

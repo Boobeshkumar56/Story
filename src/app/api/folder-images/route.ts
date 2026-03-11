@@ -19,11 +19,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all resources (images) from the specified folder
+    const maxResults = parseInt(searchParams.get('max_results') || '500', 10);
+
+    // Fetch resources (images) from the specified folder
     const result = await cloudinary.api.resources({
       type: 'upload',
       prefix: folderName,
-      max_results: 500,
+      max_results: Math.min(maxResults, 500),
       resource_type: 'image'
     });
 
@@ -36,12 +38,10 @@ export async function GET(request: NextRequest) {
       createdAt: resource.created_at
     }));
 
-    return NextResponse.json({
-      success: true,
-      folder: folderName,
-      images,
-      count: images.length
-    });
+    return NextResponse.json(
+      { success: true, folder: folderName, images, count: images.length },
+      { headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600' } }
+    );
   } catch (error: any) {
     console.error('Error fetching folder images:', error);
     return NextResponse.json(

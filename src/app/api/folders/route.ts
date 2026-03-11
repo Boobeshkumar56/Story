@@ -15,11 +15,10 @@ export async function GET() {
     const folders = result.folders || [];
     const folderList = folders.map((folder: any) => folder.name);
     
-    return NextResponse.json({
-      success: true,
-      folders: folderList,
-      count: folderList.length
-    });
+    return NextResponse.json(
+      { success: true, folders: folderList, count: folderList.length },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+    );
   } catch (error: any) {
     console.error('Error fetching folders:', error);
     return NextResponse.json(
