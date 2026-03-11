@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
@@ -32,14 +33,12 @@ function LogoWithDoubleClick() {
   return (
     <div onClick={handleClick} className="cursor-pointer flex items-center">
       <div className="w-16 h-16 relative">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          {/* Chevron */}
-          <path d="M 20 60 L 50 30 L 80 60" fill="none" stroke="black" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-          {/* ONE */}
-          <text x="50" y="75" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">ÔNE</text>
-          {/* WAY */}
-          <text x="50" y="95" fontSize="28" fontWeight="900" textAnchor="middle" fill="black">WAY</text>
-        </svg>
+        <Image
+          src="/logo.png"
+          alt="One Way Art Studio"
+          fill
+          className="object-contain"
+        />
       </div>
     </div>
   );

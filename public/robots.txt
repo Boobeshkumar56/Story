@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Disallow admin routes
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://storiesbymithuashwin.com/sitemap.xml

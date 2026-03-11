@@ -19,8 +19,10 @@ export default function Blogs() {
     try {
       setLoading(true);
       
-      // Get list of folders from localStorage (tracking which folders exist)
-      const eventFolders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+      // Get list of folders from Cloudinary (works on all devices)
+      const foldersRes = await fetch('/api/folders');
+      const foldersData = await foldersRes.json();
+      const eventFolders: string[] = foldersData.success ? foldersData.folders : [];
       
       if (eventFolders.length === 0) {
         // Show demo data if no events exist
@@ -49,10 +51,29 @@ export default function Blogs() {
             const result = await response.json();
             
             if (result.success && result.metadata.addToBlogs) {
+              let coverImage = result.metadata.coverImage;
+
+              // If no cover image set, use the first image from the folder
+              if (!coverImage) {
+                try {
+                  const imagesRes = await fetch(`/api/folder-images?folder=${folderName}`);
+                  const imagesData = await imagesRes.json();
+                  if (imagesData.success && imagesData.images.length > 0) {
+                    const validImages = imagesData.images.filter((img: any) => !img.publicId.includes('metadata'));
+                    if (validImages.length > 0) {
+                      coverImage = validImages[0].url;
+                    }
+                  }
+                } catch {
+                  // ignore, coverImage stays undefined
+                }
+              }
+
               return {
                 id: folderName,
                 folderName: folderName,
-                ...result.metadata
+                ...result.metadata,
+                coverImage
               };
             }
             return null;
@@ -164,9 +185,10 @@ export default function Blogs() {
                   <Link href={`/blogs/${post.id}`} className="block relative">
                     <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
                       <Image
-                        src={post.coverImage || post.image}
+                        src={post.coverImage || post.image || '/image3.webp'}
                         alt={post.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -240,7 +262,7 @@ export default function Blogs() {
               >
                 <div className="relative h-72 overflow-hidden">
                   <Image
-                    src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=600&fit=crop"
+                    src="/mithu-ashwin.jpg"
                     alt="Mithu Ashwin"
                     fill
                     className="object-cover"

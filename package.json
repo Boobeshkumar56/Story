@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "cloudinary": "^2.8.0",

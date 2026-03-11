@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Instagram, Calendar, Clock } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 export default function BookUs() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ export default function BookUs() {
     message: ''
   });
   const [isEventTypeOpen, setIsEventTypeOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [formError, setFormError] = useState('');
   const eventTypes = ['Wedding', 'Portrait Session', 'Event', 'Other'];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -25,9 +28,39 @@ export default function BookUs() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setFormStatus('loading');
+    setFormError('');
+    try {
+      const fullMessage = [
+        `Name: ${formData.name}`,
+        `Email: ${formData.email}`,
+        `Phone: ${formData.phone}`,
+        `Event Date: ${formData.date}`,
+        `Event Type: ${formData.eventType}`,
+        `Location: ${formData.location}`,
+        ``,
+        `Message:`,
+        formData.message,
+      ].join('\n');
+
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: fullMessage,
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+      setFormStatus('success');
+      setFormData({ name: '', email: '', phone: '', date: '', eventType: '', location: '', message: '' });
+    } catch {
+      setFormError('Failed to send message. Please try again or contact directly via email.');
+      setFormStatus('error');
+    }
   };
 
   const services = [
@@ -345,14 +378,26 @@ export default function BookUs() {
                   />
                 </div>
 
-                <div className="pt-8">
-                  <button
-                    type="submit"
-                    className="w-full border border-black py-4 text-sm tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300"
-                  >
-                    SEND MESSAGE
-                  </button>
-                </div>
+                {formStatus === 'error' && (
+                  <p className="text-red-600 text-sm tracking-wide">{formError}</p>
+                )}
+
+                {formStatus === 'success' ? (
+                  <div className="pt-8 text-center border border-black py-8 px-6">
+                    <p className="text-lg font-light tracking-[0.15em] mb-2">THANK YOU</p>
+                    <p className="text-gray-600 text-sm tracking-wide">Your message has been received. I &apos;ll get back to you within 24 hours.</p>
+                  </div>
+                ) : (
+                  <div className="pt-8">
+                    <button
+                      type="submit"
+                      disabled={formStatus === 'loading'}
+                      className="w-full border border-black py-4 text-sm tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {formStatus === 'loading' ? 'SENDING...' : 'SEND MESSAGE'}
+                    </button>
+                  </div>
+                )}
               </form>
             </motion.div>
           </div>

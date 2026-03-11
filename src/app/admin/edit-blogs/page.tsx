@@ -51,7 +51,9 @@ export default function EditBlogs() {
   const loadBlogs = async () => {
     try {
       setLoading(true);
-      const eventFolders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+      const foldersRes = await fetch('/api/folders');
+      const foldersData = await foldersRes.json();
+      const eventFolders: string[] = foldersData.success ? foldersData.folders : [];
       
       const blogsData = await Promise.all(
         eventFolders.map(async (folderName: string) => {
@@ -113,15 +115,12 @@ export default function EditBlogs() {
     }
 
     try {
-      // Remove from localStorage
-      const eventFolders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
-      const updatedFolders = eventFolders.filter((f: string) => f !== folderName);
-      localStorage.setItem('eventFolders', JSON.stringify(updatedFolders));
-
+      // Remove from Cloudinary by deleting all assets in the folder
+      // (Images must be deleted via /api/upload individually, or via Cloudinary dashboard)
       // Update state
       setBlogs(blogs.filter(b => b.folderName !== folderName));
       
-      alert('Blog deleted successfully! Note: Images in Cloudinary need to be deleted manually from the Cloudinary dashboard.');
+      alert('Blog removed from the list. Note: Images in Cloudinary need to be deleted manually from the Cloudinary dashboard.');
     } catch (error) {
       console.error('Error deleting blog:', error);
       alert('Failed to delete blog');

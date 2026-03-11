@@ -16,15 +16,62 @@ interface RecentWork {
 
 export default function Home() {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-  
-  // Static carousel images from public/carousel directory
-  const staticCarouselImages: RecentWork[] = [
-    { src: '/carousel/image1.jpg', title: 'CAPTURING MOMENTS', location: 'Coonoor, 2024' },
-    { src: '/carousel/image2.jpg', title: 'TIMELESS MEMORIES', location: 'Nilgiris, 2024' },
-    { src: '/carousel/image3.jpg', title: 'PURE EMOTIONS', location: 'Ooty, 2024' },
-    { src: '/carousel/image4.jpg', title: 'LOVE STORIES', location: 'Kerala, 2024' },
-    { src: '/carousel/image5.jpg', title: 'SPECIAL MOMENTS', location: 'Coimbatore, 2024' },
-  ];
+  const [carouselImages, setCarouselImages] = useState<RecentWork[]>([
+    { src: '/carousel/image1.jpg', title: 'FOREVER BEGINS TODAY', location: 'A love story captured for eternity' },
+    { src: '/carousel/image2.jpg', title: 'TWO HEARTS, ONE JOURNEY', location: 'Celebrating the sacred bond of marriage' },
+    { src: '/carousel/image3.jpg', title: 'VOWS & FOREVER', location: 'Where promises become memories' },
+    { src: '/carousel/image4.jpg', title: 'MOMENTS OF PURE LOVE', location: "A mother's love — the greatest story ever told" },
+    { src: '/carousel/image5.jpg', title: 'LOVE IN EVERY FRAME', location: 'Together, always and forever' },
+  ]);
+
+  useEffect(() => {
+    const loadCarouselImages = async () => {
+      try {
+        const foldersRes = await fetch('/api/folders');
+        const foldersData = await foldersRes.json();
+        const eventFolders: string[] = foldersData.success ? foldersData.folders : [];
+        if (eventFolders.length === 0) return;
+
+        const entries = await Promise.all(
+          eventFolders.map(async (folderName: string) => {
+            try {
+              const metaRes = await fetch(`/api/metadata?folder=${folderName}`);
+              const metaData = await metaRes.json();
+              if (!metaData.success) return null;
+              const meta = metaData.metadata;
+
+              let coverImage = meta.coverImage;
+              if (!coverImage) {
+                const imagesRes = await fetch(`/api/folder-images?folder=${folderName}`);
+                const imagesData = await imagesRes.json();
+                if (imagesData.success && imagesData.images.length > 0) {
+                  const valid = imagesData.images.filter((img: any) => !img.publicId.includes('metadata'));
+                  if (valid.length > 0) coverImage = valid[0].url;
+                }
+              }
+
+              if (!coverImage) return null;
+
+              return {
+                src: coverImage,
+                title: (meta.title || folderName).toUpperCase(),
+                location: meta.location || meta.excerpt || 'A beautiful story captured forever',
+              } as RecentWork;
+            } catch {
+              return null;
+            }
+          })
+        );
+
+        const valid = entries.filter((e): e is RecentWork => e !== null);
+        if (valid.length > 0) setCarouselImages(valid);
+      } catch {
+        // keep default static images
+      }
+    };
+
+    loadCarouselImages();
+  }, []);
 
 
 
@@ -89,7 +136,7 @@ export default function Home() {
             <div className="relative w-full max-w-2xl mx-auto">
               <Image
                 src="/image3.webp"
-                alt="Travel & Photography - Capturing Moments Around the World"
+                alt="Mithu Ashwin - Stories by Mithu Ashwin Photography"
                 width={800}
                 height={600}
                 className="w-full h-auto rounded-lg"
@@ -198,7 +245,7 @@ export default function Home() {
           transition={{ duration: 1, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          <ImageCarousel images={staticCarouselImages} />
+          <ImageCarousel images={carouselImages} />
         </motion.div>
       </section>
 

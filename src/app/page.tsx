@@ -11,11 +11,11 @@ export default function Welcome() {
   const [isTransitioning, setIsTransitioning] = useState(true);
 
   const carouselImages = [
-    'https://picsum.photos/1920/1080?random=1',
-    'https://picsum.photos/1920/1080?random=2',
-    'https://picsum.photos/1920/1080?random=3',
-    'https://picsum.photos/1920/1080?random=4',
-    'https://picsum.photos/1920/1080?random=5',
+    '/carousel/image1.jpg',
+    '/carousel/image2.jpg',
+    '/carousel/image3.jpg',
+    '/carousel/image4.jpg',
+    '/carousel/image5.jpg',
   ];
 
   // Triple the images for smoother infinite loop

@@ -58,13 +58,13 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
       try {
         setLoading(true);
         
-        // Get all event folders from localStorage
-        const folders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
-        console.log('Library - Folders from localStorage:', folders);
+        // Get all event folders from Cloudinary (works on all devices)
+        const foldersRes = await fetch('/api/folders');
+        const foldersData = await foldersRes.json();
+        const folders: string[] = foldersData.success ? foldersData.folders : [];
         
         if (folders.length === 0) {
           // No folders, show empty state
-          console.log('Library - No folders found');
           setGalleryImages([]);
           setLoading(false);
           return;

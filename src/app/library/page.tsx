@@ -32,8 +32,10 @@ export default function Library() {
       try {
         setLoading(true);
         
-        // Get all event folders from localStorage
-        const folders = JSON.parse(localStorage.getItem('eventFolders') || '[]');
+        // Get all event folders from Cloudinary (works on all devices)
+        const foldersRes = await fetch('/api/folders');
+        const foldersData = await foldersRes.json();
+        const folders: string[] = foldersData.success ? foldersData.folders : [];
         
         if (folders.length === 0) {
           // No folders, show empty state
