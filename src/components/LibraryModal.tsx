@@ -28,14 +28,8 @@ interface GalleryImage {
 
 export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
-  const [filteredImages, setFilteredImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [currentGalleryKey, setCurrentGalleryKey] = useState(0);
-  
-  const categories = ['All', 'Wedding', 'Pre-Wedding', 'Portrait', 'Event', 'Birthday'];
 
   // Increment gallery key when modal opens to force fresh WebGL context
   useEffect(() => {
@@ -45,9 +39,6 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
     } else {
       // Reset states when modal closes to free memory
       setGalleryImages([]);
-      setFilteredImages([]);
-      setSearchQuery('');
-      setSelectedCategory('All');
     }
   }, [isOpen]);
 
@@ -134,11 +125,9 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
         console.log('Library - All images collected:', allImages);
         // Only set real Cloudinary images, no mock data
         setGalleryImages(allImages);
-        setFilteredImages(allImages);
       } catch (error) {
         console.error('Error fetching library images:', error);
         setGalleryImages([]); // Show empty state on error
-        setFilteredImages([]);
       } finally {
         setLoading(false);
       }
@@ -147,28 +136,6 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
     fetchLibraryImages();
   }, [isOpen]); // Re-fetch when modal opens
 
-  // Filter images based on search and category
-  useEffect(() => {
-    let filtered = [...galleryImages];
-
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(img => img.category === selectedCategory);
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(img => 
-        img.title.toLowerCase().includes(query) ||
-        img.folderName.toLowerCase().includes(query) ||
-        img.category?.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredImages(filtered);
-  }, [searchQuery, selectedCategory, galleryImages]);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -176,134 +143,81 @@ export default function LibraryModal({ isOpen, onClose }: LibraryModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-white z-50 overflow-y-auto"
+          className="fixed inset-0 bg-white z-50 overflow-hidden"
         >
-          <div className="min-h-screen">
-            {/* Header - Fixed at top with filters */}
-            <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
-              <div className="px-6 md:px-12 py-4">
-                {/* Single row: Close, Dropdown, and Search */}
-                <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-                  {/* Left side: Close button and Category Dropdown */}
-                  <div className="flex items-center gap-4">
-                    <motion.button
-                      onClick={onClose}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-sm tracking-wide hover:bg-gray-800 transition-all"
-                    >
-                      <X size={18} />
-                      CLOSE
-                    </motion.button>
-
-                    {/* Category Dropdown */}
-                    <motion.div 
-                      className="relative"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                        className="inline-flex items-center justify-between min-w-[140px] text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all whitespace-nowrap"
-                      >
-                        {selectedCategory}
-                        <svg className="w-4 h-4 ms-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      {isCategoryOpen && (
-                        <div className="absolute z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg min-w-[140px]">
-                          <ul className="p-2 text-sm text-gray-700 font-medium">
-                            {categories.map(cat => (
-                              <li key={cat}>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedCategory(cat);
-                                    setIsCategoryOpen(false);
-                                  }}
-                                  className="inline-flex items-center w-full p-2 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors text-left whitespace-nowrap"
-                                >
-                                  {cat}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </motion.div>
-                  </div>
-
-                  {/* Right side: Search Input */}
-                  <motion.div 
-                    className="relative w-full md:w-80"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
+          <div className="h-screen flex flex-col">
+            {/* Header */}
+            <div className="relative z-50 flex items-center justify-between px-6 md:px-12 py-5 border-b border-gray-100">
+              {/* Title */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="flex flex-col"
+              >
+                <span className="font-dancing text-black text-4xl md:text-5xl leading-none">
+                  Library
+                </span>
+                <motion.span
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  className="block h-px bg-black/20 mt-1"
+                />
+                {!loading && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="text-gray-400 text-xs tracking-[0.25em] uppercase mt-1"
                   >
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 pl-10 text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all"
-                    />
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    {searchQuery && (
-                      <motion.button
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
-                      >
-                        <X size={16} />
-                      </motion.button>
-                    )}
-                  </motion.div>
-                </div>
+                    {galleryImages.length} {galleryImages.length === 1 ? 'moment' : 'moments'} captured
+                  </motion.span>
+                )}
+              </motion.div>
 
-                {/* Results count */}
-                <motion.p 
-                  className="text-sm text-gray-500 mt-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  {filteredImages.length} {filteredImages.length === 1 ? 'image' : 'images'} found
-                </motion.p>
-              </div>
+              {/* Close button */}
+              <motion.button
+                onClick={onClose}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-full text-xs tracking-[0.2em] hover:bg-black hover:text-white hover:border-black transition-all duration-300"
+              >
+                <X size={14} />
+                CLOSE
+              </motion.button>
             </div>
 
-            {/* 3D Gallery Section */}
-            <section className="h-[calc(100vh-140px)] w-full bg-white">
+            {/* 3D Gallery Section — fill remaining height */}
+            <section className="flex-1 w-full min-h-0">
               {loading ? (
-                <div className="flex justify-center items-center h-full">
+                <div className="flex flex-col justify-center items-center h-full gap-4">
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full"
+                    transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' }}
+                    className="w-10 h-10 border-2 border-gray-200 border-t-black rounded-full"
                   />
+                  <p className="text-gray-400 text-xs tracking-[0.3em] uppercase">Loading moments</p>
                 </div>
-              ) : filteredImages.length === 0 ? (
-                <motion.div 
+              ) : galleryImages.length === 0 ? (
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center justify-center h-full"
+                  className="flex flex-col items-center justify-center h-full gap-3"
                 >
-                  <p className="text-gray-600 tracking-[0.2em] text-lg mb-2">NO IMAGES FOUND</p>
-                  <p className="text-sm text-gray-400">Try adjusting your search or filter</p>
+                  <p className="text-gray-500 tracking-[0.2em] text-lg">THE LIBRARY IS EMPTY</p>
+                  <p className="text-sm text-gray-400 tracking-widest">Check back soon</p>
                 </motion.div>
               ) : (
-                <InfiniteGallery 
+                <InfiniteGallery
                   key={currentGalleryKey}
-                  images={filteredImages.map(img => img.src)}
+                  images={galleryImages.slice(0, 30).map(img => img.src)}
                   className="w-full h-full"
                   speed={1}
-                  visibleCount={Math.min(filteredImages.length, 8)}
+                  visibleCount={10}
                   fadeSettings={{
                     fadeIn: { start: 0.05, end: 0.25 },
                     fadeOut: { start: 0.4, end: 0.43 }
