@@ -64,21 +64,11 @@ export default function BookUs() {
   };
 
   const services = [
-    {
-      title: 'Weddings',
-      description: 'Complete wedding day coverage with a storytelling approach',
-      features: ['Full day coverage', '300+ edited images', 'Online gallery', 'Print release'],
-    },
-    {
-      title: 'Portraits',
-      description: 'Personal and intimate portrait sessions',
-      features: ['2-hour session', '50+ edited images', 'Styling consultation', 'Location scouting'],
-    },
-    {
-      title: 'Events',
-      description: 'Corporate and social event photography',
-      features: ['Event coverage', '100+ edited images', 'Same day previews', 'Digital delivery'],
-    },
+    { title: 'Documentary Weddings' },
+    { title: 'Parties' },
+    { title: 'Portraits' },
+    { title: 'Documentaries' },
+    { title: 'Events' },
   ];
 
   return (
@@ -92,8 +82,8 @@ export default function BookUs() {
             transition={{ duration: 1 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl md:text-6xl font-light tracking-[0.1em] mb-6">
-              BOOK YOUR SESSION
+            <h1 className="font-playfair text-4xl md:text-6xl font-light tracking-[0.05em] mb-6">
+              Book Your Session
             </h1>
             <p className="text-lg tracking-[0.2em] text-gray-600 mb-8">
               LET&apos;S CREATE SOMETHING BEAUTIFUL TOGETHER
@@ -108,8 +98,8 @@ export default function BookUs() {
             className="max-w-4xl mx-auto text-center"
           >
             <p className="text-lg leading-relaxed text-gray-700 mb-8">
-              Whether it&apos;s your wedding day, a portrait session, or a special event, 
-              I&apos;m here to capture your most precious moments with creativity and passion. 
+              Whether it&apos;s your wedding day, a portrait session, or a special event,
+              I&apos;m here to capture your most precious moments with creativity and passion.
               Let&apos;s discuss how we can tell your unique story together.
             </p>
           </motion.div>
@@ -126,75 +116,41 @@ export default function BookUs() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-light tracking-[0.15em] mb-6 text-black">
-              WHAT I OFFER
+            <h2 className="font-playfair text-4xl md:text-5xl font-light tracking-wide mb-6 text-black">
+              What I Offer
             </h2>
             <div className="w-24 h-px bg-gray-400 mx-auto"></div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {services.map((service, index) => (
               <motion.div
                 key={service.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-400 transition-all duration-500 p-12"
+                className="group relative overflow-hidden bg-white border border-gray-200 hover:border-black transition-all duration-500 p-8 cursor-default"
               >
                 {/* Number */}
-                <div className="absolute top-8 right-8 text-6xl font-light text-gray-200 group-hover:text-gray-300 transition-colors">
+                <div className="absolute top-6 right-6 text-5xl font-light text-gray-100 group-hover:text-gray-200 transition-colors select-none">
                   0{index + 1}
                 </div>
 
                 {/* Content */}
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-light tracking-[0.15em] mb-6 border-b border-gray-200 pb-4 text-black">
+                  <h3 className="text-base font-light tracking-[0.12em] text-black pt-8">
                     {service.title.toUpperCase()}
                   </h3>
-                  
-                  <p className="text-gray-600 mb-8 leading-relaxed font-light">
-                    {service.description}
-                  </p>
-
-                  {/* Features */}
-                  <ul className="space-y-4">
-                    {service.features.map((feature, featureIndex) => (
-                      <li
-                        key={featureIndex}
-                        className="flex items-start gap-3 text-sm text-gray-700"
-                      >
-                        <span className="text-black mt-1">→</span>
-                        <span className="tracking-wide">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
 
                 {/* Hover Effect Line */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
               </motion.div>
             ))}
           </div>
 
-          {/* Additional Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mt-16 pt-16 border-t border-gray-200"
-          >
-            <p className="text-gray-600 text-lg mb-6 font-light">
-              Each package can be customized to fit your unique needs
-            </p>
-            <Link
-              href="#contact"
-              className="inline-block border border-black text-black px-12 py-4 text-sm tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300"
-            >
-              LET&apos;S DISCUSS
-            </Link>
-          </motion.div>
+
         </div>
       </section>
 
@@ -212,7 +168,7 @@ export default function BookUs() {
               <h3 className="text-2xl font-light tracking-[0.1em] mb-8">
                 GET IN TOUCH
               </h3>
-              
+
               <div className="space-y-6 mb-12">
                 <div className="flex items-start space-x-4">
                   <Mail className="text-gray-600 mt-1" size={20} />
@@ -221,7 +177,7 @@ export default function BookUs() {
                     <p className="text-gray-600">hello@mithuashwin.com</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
                   <Phone className="text-gray-600 mt-1" size={20} />
                   <div>
@@ -229,7 +185,7 @@ export default function BookUs() {
                     <p className="text-gray-600">+91 98765 43210</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-4">
                   <MapPin className="text-gray-600 mt-1" size={20} />
                   <div>

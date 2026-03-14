@@ -87,11 +87,10 @@ export default function Navbar() {
               >
                 <Link
                   href={item.href}
-                  className={`relative px-4 py-2 text-xs font-light tracking-widest transition-colors duration-300 ${
-                    pathname === item.href
-                      ? 'text-black'
-                      : 'text-gray-600 hover:text-black'
-                  }`}
+                  className={`relative px-4 py-2 text-xs font-light tracking-widest transition-colors duration-300 ${pathname === item.href
+                    ? 'text-black'
+                    : 'text-gray-600 hover:text-black'
+                    }`}
                 >
                   {item.name.toUpperCase()}
                   {pathname === item.href && (
@@ -109,7 +108,7 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center gap-4">
-            <span className="font-dancing text-base text-black">by Mithu Ashwin</span>
+            <span className="font-dancing text-base text-black" style={{ fontWeight: 700 }}>by Mithu Ashwin</span>
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -140,11 +139,10 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 text-sm font-light tracking-widest transition-colors duration-200 ${
-                    pathname === item.href
-                      ? 'text-black bg-gray-100 rounded-md'
-                      : 'text-gray-600 hover:text-black hover:bg-gray-50 rounded-md'
-                  }`}
+                  className={`block px-3 py-2 text-sm font-light tracking-widest transition-colors duration-200 ${pathname === item.href
+                    ? 'text-black bg-gray-100 rounded-md'
+                    : 'text-gray-600 hover:text-black hover:bg-gray-50 rounded-md'
+                    }`}
                 >
                   {item.name.toUpperCase()}
                 </Link>

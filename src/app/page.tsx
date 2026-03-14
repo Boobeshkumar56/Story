@@ -38,7 +38,7 @@ export default function Welcome() {
         setIsTransitioning(false);
         setCurrentIndex(0);
       }, 800);
-      
+
       setTimeout(() => {
         setIsTransitioning(true);
       }, 850);
@@ -55,7 +55,7 @@ export default function Welcome() {
             <motion.div
               className="flex h-full will-change-transform"
               animate={{ x: `-${currentIndex * 100}%` }}
-              transition={{ 
+              transition={{
                 type: "tween",
                 ease: [0.4, 0.0, 0.2, 1],
                 duration: isTransitioning ? 0.8 : 0
@@ -81,47 +81,47 @@ export default function Welcome() {
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30 z-10" />
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 z-20 flex flex-col text-white text-center px-6">
-        {/* Brand Title - At Top */}
-        <div className="pt-15 md:pt-35">
-          <h1 className="text-sm md:text-base font-bold flex items-center justify-center gap-2">
-            <span className="tracking-[0.3em]">STORIES</span>
-            <span className="font-dancing text-xl md:text-2xl">♡</span>
-            <span className="tracking-[0.3em]">BY MITHU ASHWIN</span>
-          </h1>
-        </div>
+          {/* Content Overlay */}
+          <div className="absolute inset-0 z-20 flex flex-col text-white text-center px-6">
+            {/* Brand Title - At Top */}
+            <div className="pt-15 md:pt-35">
+              <h1 className="text-sm md:text-base font-bold flex items-center justify-center gap-2">
+                <span className="tracking-[0.3em]">STORIES</span>
+                <span className="font-dancing text-xl md:text-2xl">♡</span>
+                <span className="tracking-[0.3em]">BY MITHU ASHWIN</span>
+              </h1>
+            </div>
 
-        {/* Main Content - Centered */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          {/* Main Tagline - in cursive */}
-          <h2 className="font-dancing text-2xl md:text-3xl lg:text-4xl mb-8 leading-tight max-w-4xl">
-            Finding beauty in every moment,
-            <br />
-            connecting through the lens.
-          </h2>
+            {/* Main Content - Centered */}
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* Main Tagline - in cursive */}
+              <h2 className="font-playfair text-2xl md:text-3xl lg:text-4xl mb-8 leading-tight max-w-4xl font-light">
+                Finding beauty in every moment,
+                <br />
+                connecting through the lens.
+              </h2>
 
-          {/* Welcome Button */}
-          <Link 
-            href="/home"
-            className="border-2 border-white text-white bg-transparent px-12 py-3 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300 font-light"
-          >
-            WELCOME
-          </Link>
-        </div>
+              {/* Welcome Button */}
+              <Link
+                href="/home"
+                className="border-2 border-white text-white bg-transparent px-12 py-3 text-sm tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-300 font-light"
+              >
+                WELCOME
+              </Link>
+            </div>
 
-        {/* Social Media Icons - Bottom Center */}
-        <div className="pb-8">
-          <a
-            href="https://www.instagram.com/one_way_art_studio?igsh=aGR1b3lsNTNjc3Ay"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white hover:text-gray-300 transition-colors duration-300 inline-block"
-          >
-            <Instagram size={30} />
-          </a>
-        </div>
-      </div>
+            {/* Social Media Icons - Bottom Center */}
+            <div className="pb-8">
+              <a
+                href="https://www.instagram.com/one_way_art_studio?igsh=aGR1b3lsNTNjc3Ay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-300 transition-colors duration-300 inline-block"
+              >
+                <Instagram size={30} />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>

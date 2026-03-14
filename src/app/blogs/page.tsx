@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, Eye, Calendar, Award, MapPin, MessageCircle } from 'lucide-react';
+import { Heart, Calendar, Award, MapPin, MessageCircle } from 'lucide-react';
 
 export default function Blogs() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -80,7 +80,7 @@ export default function Blogs() {
       <section className="pt-20 pb-16 px-8 md:px-12 bg-white relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 opacity-60"></div>
-          <motion.div 
+          <motion.div
             className="absolute inset-0 opacity-5"
             animate={{
               backgroundPosition: ['0% 0%', '100% 100%'],
@@ -109,17 +109,17 @@ export default function Blogs() {
               transition={{ duration: 1, delay: 0.2 }}
               className="mb-8"
             >
-              <h1 className="font-dancing text-5xl md:text-6xl mb-6 text-black">
+              <h1 className="font-playfair text-5xl md:text-6xl mb-6 text-black font-light tracking-wide">
                 Our Stories
               </h1>
-              <motion.div 
+              <motion.div
                 className="w-32 h-px bg-black mx-auto"
                 initial={{ width: 0 }}
                 animate={{ width: 128 }}
                 transition={{ duration: 1, delay: 0.5 }}
               ></motion.div>
             </motion.div>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
@@ -146,68 +146,58 @@ export default function Blogs() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post, index) => {
-              
-              return (
-                <motion.article
-                  key={post.id}
-                  initial={{ opacity: 0, y: 60 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ 
-                    duration: 0.7, 
-                    delay: index * 0.15,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }}
-                  className="bg-white rounded-lg overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-lg"
-                >
-                  <Link href={`/blogs/${post.id}`} className="block relative">
-                    <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
-                      <Image
-                        src={post.coverImage || post.image || '/image3.webp'}
-                        alt={post.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                      
-                      {/* Content Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
-                        <span className="text-xs tracking-[0.3em] text-gray-200 mb-2 block font-medium">
-                          {post.category.toUpperCase()}
-                        </span>
-                        
-                        <h3 className="font-dancing text-2xl md:text-3xl mb-2 leading-tight">
-                          {post.title}
-                        </h3>
-                        
-                        <p className="text-gray-200 text-sm mb-3 line-clamp-2 font-light leading-relaxed">
-                          {post.excerpt}
-                        </p>
+              {blogPosts.map((post, index) => {
 
-                        {/* Stats */}
-                        <div className="flex items-center gap-4 text-xs text-gray-300">
-                          <span className="flex items-center gap-2">
-                            <Heart size={16} />
-                            {post.likes || 0}
+                return (
+                  <motion.article
+                    key={post.id}
+                    initial={{ opacity: 0, y: 60 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{
+                      duration: 0.7,
+                      delay: index * 0.15,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                    className="bg-white rounded-lg overflow-hidden shadow-md transition-shadow duration-300 hover:shadow-lg"
+                  >
+                    <Link href={`/blogs/${post.id}`} className="block relative">
+                      <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                        <Image
+                          src={post.coverImage || post.image || '/main.png'}
+                          alt={post.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                        {/* Content Overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                          <span className="text-xs tracking-[0.3em] text-gray-200 mb-2 block font-medium">
+                            {post.category.toUpperCase()}
                           </span>
-                          <span className="flex items-center gap-2">
-                            <Eye size={16} />
-                            {post.views || 0}
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <Calendar size={16} />
-                            {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                          </span>
+
+                          <h3 className="font-playfair text-2xl md:text-3xl mb-2 leading-tight font-light">
+                            {post.title}
+                          </h3>
+
+                          <p className="text-gray-200 text-sm mb-3 line-clamp-2 font-light leading-relaxed">
+                            {post.excerpt}
+                          </p>
+
+                          {/* Date */}
+                          <div className="flex items-center gap-2 text-xs text-gray-300">
+                            <Calendar size={14} />
+                            <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                </motion.article>
-              );
-            })}
-          </div>
+                    </Link>
+                  </motion.article>
+                );
+              })}
+            </div>
           )}
         </div>
       </section>
@@ -276,19 +266,19 @@ export default function Blogs() {
               className="lg:col-span-3 space-y-4"
             >
               <div>
-                <h3 className="text-3xl mb-4 text-gray-800" style={{ fontFamily: 'var(--font-dancing), cursive', fontWeight: '400' }}>Hello everyone, this is Mithu</h3>
+                <h3 className="font-playfair text-3xl mb-4 text-gray-800 font-light tracking-wide">Hello everyone, this is Mithu</h3>
                 <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                  I&apos;m a passionate photographer based in the beautiful hills of Coonoor, Nilgiris. 
-                  My journey with photography began in 2013, and since then, I&apos;ve been capturing 
+                  I&apos;m a passionate photographer based in the beautiful hills of Coonoor, Nilgiris.
+                  My journey with photography began in 2013, and since then, I&apos;ve been capturing
                   life&apos;s most precious moments.
                 </p>
                 <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                  I believe every moment has a story to tell, and through my lens, I try to preserve 
-                  those fleeting emotions and memories that make life beautiful. From intimate weddings 
+                  I believe every moment has a story to tell, and through my lens, I try to preserve
+                  those fleeting emotions and memories that make life beautiful. From intimate weddings
                   to candid portraits, each shoot is a new adventure.
                 </p>
                 <p className="text-gray-700 text-sm leading-relaxed mb-6">
-                  When I&apos;m not behind the camera, you&apos;ll find me exploring the misty hills of 
+                  When I&apos;m not behind the camera, you&apos;ll find me exploring the misty hills of
                   Nilgiris, always searching for that perfect light and moment to capture.
                 </p>
 
@@ -357,11 +347,11 @@ export default function Blogs() {
                 className="object-contain"
               />
             </div>
-            
-            <h3 className="text-2xl mb-3 text-black" style={{ fontFamily: 'var(--font-dancing), cursive', fontWeight: '400' }}>One Way Art Studio</h3>
+
+            <h3 className="font-playfair text-2xl mb-3 text-black font-light tracking-wide">One Way Art Studio</h3>
             <p className="text-base text-gray-600 mb-3">Est. 2018</p>
             <p className="text-sm text-gray-700 max-w-2xl mx-auto leading-relaxed">
-              Dedicated to capturing the essence of your special moments through exceptional photography and videography. 
+              Dedicated to capturing the essence of your special moments through exceptional photography and videography.
               Every frame tells a story, every moment becomes a cherished memory.
             </p>
           </motion.div>

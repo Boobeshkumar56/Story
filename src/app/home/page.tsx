@@ -59,10 +59,10 @@ export default function Home() {
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="elegant-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <circle cx="10" cy="10" r="1.5" fill="#000" opacity="0.2"/>
-                <circle cx="40" cy="40" r="1" fill="#000" opacity="0.15"/>
-                <circle cx="70" cy="70" r="1.5" fill="#000" opacity="0.2"/>
-                <path d="M 0 40 Q 20 35 40 40 T 80 40" stroke="#000" strokeWidth="0.5" fill="none" opacity="0.1"/>
+                <circle cx="10" cy="10" r="1.5" fill="#000" opacity="0.2" />
+                <circle cx="40" cy="40" r="1" fill="#000" opacity="0.15" />
+                <circle cx="70" cy="70" r="1.5" fill="#000" opacity="0.2" />
+                <path d="M 0 40 Q 20 35 40 40 T 80 40" stroke="#000" strokeWidth="0.5" fill="none" opacity="0.1" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#elegant-pattern)" />
@@ -77,8 +77,8 @@ export default function Home() {
             transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="mb-20"
           >
-            <motion.h2 
-              className="font-dancing text-3xl md:text-5xl mb-6 text-black leading-tight"
+            <motion.h2
+              className="font-playfair text-5xl md:text-7xl mb-6 text-black leading-tight font-light"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
@@ -91,7 +91,7 @@ export default function Home() {
               animate={{ width: 128 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             />
-            <motion.p 
+            <motion.p
               className="text-xl leading-relaxed text-gray-700 max-w-3xl mx-auto font-light"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -108,12 +108,12 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.2 }}
             className="mb-20"
           >
-            <div className="relative w-full max-w-2xl mx-auto">
+            <div className="relative w-full max-w-5xl mx-auto">
               <Image
-                src="/image3.webp"
+                src="/main.png"
                 alt="Mithu Ashwin - Stories by Mithu Ashwin Photography"
-                width={800}
-                height={600}
+                width={1400}
+                height={1050}
                 className="w-full h-auto rounded-lg"
               />
             </div>
@@ -127,8 +127,8 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.2 }}
             className="mb-20"
           >
-            <motion.h3 
-              className="font-allura text-4xl md:text-5xl mb-4 text-black"
+            <motion.h3
+              className="font-playfair text-4xl md:text-5xl mb-4 text-black font-light"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
@@ -136,7 +136,7 @@ export default function Home() {
             >
               Over 150+ Brides & Grooms
             </motion.h3>
-            <motion.p 
+            <motion.p
               className="text-xl text-gray-600 mb-6 tracking-wide"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -145,14 +145,14 @@ export default function Home() {
             >
               In 5 States Around India
             </motion.p>
-            <motion.p 
+            <motion.p
               className="text-base text-gray-700 max-w-2xl mx-auto leading-relaxed font-light"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
             >
-              From the hills of Nilgiris to destinations across South India, 
+              From the hills of Nilgiris to destinations across South India,
               we capture your unique story wherever it unfolds.
             </motion.p>
           </motion.div>
@@ -187,8 +187,8 @@ export default function Home() {
           viewport={{ once: true }}
           className="text-center mb-12 px-8 relative z-10"
         >
-          <motion.h2 
-            className="font-allura text-6xl md:text-7xl mb-6 text-black"
+          <motion.h2
+            className="font-playfair text-5xl md:text-6xl mb-6 text-black font-light tracking-wide"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
@@ -203,7 +203,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ delay: 0.4, duration: 0.8 }}
           />
-          <motion.p 
+          <motion.p
             className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -234,7 +234,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-wide text-black">
+            <h2 className="font-playfair text-4xl md:text-5xl font-light mb-6 tracking-wide text-black">
               Library
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light mb-8">
@@ -263,13 +263,13 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-light mb-8 tracking-wide">
+            <h2 className="font-playfair text-4xl md:text-5xl font-light mb-8 tracking-wide">
               Let&apos;s Create Together
             </h2>
             <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
               Ready to capture your precious moments? Reach out and let&apos;s start planning your perfect photography experience.
             </p>
-            
+
             {/* Simple Arrow Link */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -285,10 +285,10 @@ export default function Home() {
                   transition={{ duration: 0.3 }}
                   className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center group-hover:bg-black transition-all duration-300"
                 >
-                  <svg 
-                    className="w-8 h-8 text-black group-hover:text-white transition-colors" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-8 h-8 text-black group-hover:text-white transition-colors"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -341,7 +341,7 @@ export default function Home() {
                     className="w-full h-full object-contain"
                   />
                 </div>
-                
+
                 {/* Tooltip */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}

@@ -5,14 +5,12 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Heart, Eye, ArrowLeft, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ArrowLeft, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function BlogPost() {
   const params = useParams();
   const id = params.id as string;
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [viewCount, setViewCount] = useState(0);
+
   const [eventData, setEventData] = useState<any>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +45,10 @@ export default function BlogPost() {
   const loadEventData = async () => {
     try {
       setLoading(true);
-      
+
       const metaResponse = await fetch(`/api/metadata?folder=${id}`);
       const metaResult = await metaResponse.json();
-      
+
       if (!metaResult.success) {
         setEventData(null);
         setLoading(false);
@@ -58,12 +56,10 @@ export default function BlogPost() {
       }
 
       setEventData(metaResult.metadata);
-      setLikeCount(metaResult.metadata.likes || 0);
-      setViewCount(metaResult.metadata.views || 0);
 
       const imagesResponse = await fetch(`/api/folder-images?folder=${id}`);
       const imagesResult = await imagesResponse.json();
-      
+
       if (imagesResult.success) {
         const images = imagesResult.images
           .filter((img: any) => !img.publicId.includes('metadata'))
@@ -71,13 +67,7 @@ export default function BlogPost() {
         setGalleryImages(images);
       }
 
-      await fetch('/api/update-stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderName: id, type: 'views', increment: true })
-      });
-      
-      setViewCount(prev => prev + 1);
+
     } catch (error) {
       console.error('Error loading event:', error);
       setEventData(null);
@@ -86,22 +76,7 @@ export default function BlogPost() {
     }
   };
 
-  const handleLike = async () => {
-    const newLiked = !liked;
-    setLiked(newLiked);
-    const newCount = newLiked ? likeCount + 1 : likeCount - 1;
-    setLikeCount(newCount);
-    
-    try {
-      await fetch('/api/update-stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderName: id, type: 'likes', increment: newLiked })
-      });
-    } catch (error) {
-      console.error('Error updating likes:', error);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -142,7 +117,7 @@ export default function BlogPost() {
           <span className="text-sm tracking-[0.2em] text-gray-600 mb-4 block">
             {eventData.category?.toUpperCase()}
           </span>
-          <h1 className="text-4xl md:text-6xl font-extralight mb-6 leading-tight">{eventData.title}</h1>
+          <h1 className="font-playfair text-4xl md:text-6xl font-light mb-6 leading-tight">{eventData.title}</h1>
           <p className="text-xl text-gray-600 font-light mb-8 max-w-3xl">{eventData.description}</p>
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-6">
             <span className="flex items-center gap-2">
@@ -152,22 +127,13 @@ export default function BlogPost() {
             {eventData.eventDate && (<><span>•</span><span>Event: {eventData.eventDate}</span></>)}
             {eventData.location && (<><span>•</span><span>Location: {eventData.location}</span></>)}
           </div>
-          <div className="flex items-center gap-8 pb-8 border-b border-gray-200">
-            <button onClick={handleLike} className={`flex items-center gap-2 transition-colors ${liked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'}`}>
-              <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
-              <span>{likeCount}</span>
-            </button>
-            <span className="flex items-center gap-2 text-gray-600">
-              <Eye size={20} />
-              {viewCount} views
-            </span>
-          </div>
+          <div className="pb-8 border-b border-gray-200" />
         </motion.div>
       </div>
 
       <section className="mb-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }} className="text-3xl font-light mb-8">
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }} className="font-playfair text-3xl font-light mb-8">
             Event Gallery
           </motion.h2>
           {galleryImages.length > 0 ? (
@@ -194,7 +160,7 @@ export default function BlogPost() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-2 py-2"
             onClick={closeLightbox}
           >
             {/* Modal box */}
@@ -204,8 +170,8 @@ export default function BlogPost() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 16 }}
               transition={{ duration: 0.25 }}
-              className="relative rounded-2xl overflow-hidden shadow-2xl w-full max-w-4xl"
-              style={{ maxHeight: '88vh', aspectRatio: '16/10' }}
+              className="relative rounded-xl overflow-hidden shadow-2xl w-full max-w-6xl"
+              style={{ maxHeight: '95vh', aspectRatio: '4/3' }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Image */}

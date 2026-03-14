@@ -6,15 +6,6 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, Facebook } from 'lucide-react';
 
-interface EventMetadata {
-  folderName: string;
-  title: string;
-  description: string;
-  coverImageUrl: string;
-  date: string;
-  addToLibrary?: boolean;
-}
-
 interface GalleryImage {
   src: string;
   title: string;
@@ -32,7 +23,6 @@ export default function Library() {
       try {
         setLoading(true);
 
-        // Single batch call — replaces N+1 pattern
         const summaryRes = await fetch('/api/event-summaries');
         const summaryData = await summaryRes.json();
 
@@ -111,16 +101,16 @@ export default function Library() {
       </nav>
 
       {/* Header */}
-      <section className="pt-32 pb-16 px-8 md:px-12">
+      <section className="pt-32 pb-10 px-8 md:px-12">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="text-center mb-16"
+            className="text-center mb-10"
           >
-            <h1 className="text-4xl md:text-6xl font-light tracking-[0.1em] mb-6">
-              LIBRARY
+            <h1 className="font-playfair text-4xl md:text-6xl font-light tracking-wide mb-6">
+              Library
             </h1>
             <p className="text-lg tracking-[0.2em] text-gray-600 mb-8">
               A CURATED COLLECTION OF FINEST WORK
@@ -131,8 +121,8 @@ export default function Library() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="pb-20 px-8 md:px-12">
-        <div className="max-w-7xl mx-auto">
+      <section className="pb-20 px-4 md:px-8">
+        <div className="max-w-screen-2xl mx-auto">
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <div className="text-gray-600">Loading library...</div>
@@ -142,42 +132,39 @@ export default function Library() {
               <p className="text-gray-600">No images in library yet.</p>
             </div>
           ) : (
-            <motion.div
-              layout
-              className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-8"
-            >
-              <AnimatePresence>
-                {galleryImages.map((image, index) => (
-                  <motion.div
-                    key={`${image.folderName}-${index}`}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.5, delay: index * 0.05 }}
-                    className="group cursor-pointer mb-8 break-inside-avoid"
-                    onClick={() => setSelectedImage(image.src)}
-                  >
-                    <div className="relative overflow-hidden">
-                      <Image
-                        src={image.src}
-                        alt={image.title}
-                        width={400}
-                        height={600}
-                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-                      <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="text-white">
-                          <p className="text-sm font-light tracking-wide">{image.title}</p>
-                          <p className="text-xs tracking-[0.2em] opacity-80">{image.date}</p>
-                        </div>
+            /* True masonry: CSS columns with tight gap, images stack at natural height */
+            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4" style={{ columnGap: '6px' }}>
+              {galleryImages.map((image, index) => (
+                <motion.div
+                  key={`${image.folderName}-${index}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: Math.min(index * 0.03, 1) }}
+                  className="group cursor-pointer break-inside-avoid"
+                  style={{ marginBottom: '6px' }}
+                  onClick={() => setSelectedImage(image.src)}
+                >
+                  <div className="relative overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image.src}
+                      alt={image.title}
+                      className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
+                    <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="text-white">
+                        <p className="text-sm font-light tracking-wide drop-shadow">{image.title}</p>
+                        {image.date && (
+                          <p className="text-xs tracking-[0.2em] opacity-80 drop-shadow">{image.date}</p>
+                        )}
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           )}
         </div>
       </section>
@@ -189,23 +176,22 @@ export default function Library() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-8"
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
             onClick={() => setSelectedImage(null)}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              exit={{ scale: 0.85, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="relative max-w-5xl max-h-[90vh]"
+              className="relative max-w-6xl max-h-[95vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={selectedImage}
                 alt="Full size image"
-                width={1200}
-                height={800}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-[95vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
               />
               <button
                 onClick={() => setSelectedImage(null)}
